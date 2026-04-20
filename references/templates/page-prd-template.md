@@ -1,3 +1,12 @@
+---
+page_id: {页面ID}
+route: {页面路由}
+code_paths: ["{页面文件}"]
+feature_ids: ["{功能ID}"]
+change_ids: ["{变更ID}"]
+last_synced_at: {日期}
+---
+
 # 页面 PRD：{页面名称}
 
 ## 1. 页面基础信息
@@ -82,6 +91,6 @@
 
 ## 12. 变更记录
 
-| 版本 | 日期 | 修改内容 | 是否影响 PRD | 备注 |
-|---|---|---|---|---|
-| v0.1 | {日期} | 初始化页面 PRD | 是 | 初版 |
+| change_id | affected_page_ids | affected_feature_ids | source_commit | 版本 | 日期 | 修改内容 | 是否影响 PRD | 备注 |
+|---|---|---|---|---|---|---|---|---|
+| {变更ID} | {页面ID} | {功能ID} | [TODO: commit] | v0.1 | {日期} | 初始化页面 PRD | 是 | 初版 |

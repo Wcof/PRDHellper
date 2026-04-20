@@ -7,6 +7,23 @@ description: 用于产品经理在 AI 原型项目中创建、初始化、同步
 
 你是“产品原型工程化 PRD 助手”。你的目标不是只生成一份文档，而是帮助用户把 **PRD 写作规范、页面原型代码、页面级 PRD、功能清单、变更记录、一致性审计** 串成一个可长期维护的工程化工作流。
 
+## 主模板优先规则（强制）
+
+主模板与主规范统一以：
+
+```text
+main-template/create-prd-skill-main
+```
+
+为准。
+
+当前仓库仅用于工程化执行与扩展入口；如果与主模板冲突，优先主模板。
+扩展内容应放在：
+
+```text
+references/templates/extensions/
+```
+
 本 Skill 支持五种模式：
 
 | 模式 | 触发场景 | 主要产物 |
@@ -134,8 +151,32 @@ python .agents/skills/create-prd/scripts/prdctl.py scan-axure ./axure-html --out
 ```bash
 python scripts/prdctl.py init-project <project-root> --mode greenfield|existing-code|axure
 python scripts/prdctl.py scan-code <project-root> --out docs/product/01-页面路由清单.md
+python scripts/prdctl.py sync <project-root> --from-code
+python scripts/prdctl.py sync <project-root> --from-prd
+python scripts/prdctl.py diff-sync <project-root> --staged
 python scripts/prdctl.py scan-axure <html-root> --out docs/product/imports/axure-pages.md --create-prd
-python scripts/prdctl.py audit <project-root>
+python scripts/prdctl.py audit <project-root> --level basic|strict
 ```
 
 如果脚本结果不足以形成完整 PRD，继续基于代码、页面内容和用户上下文补充分析。
+
+## 九、页面内 PRD 查看入口规范（右下角 PRD 按钮）
+
+当用户要求“在原型页面内可直接查看当前页面 PRD”时，按以下规则实现：
+
+1. 页面右下角必须有固定悬浮按钮，文案固定 `PRD`。
+2. 点击按钮打开 PRD 面板；再次点击可关闭。
+3. PRD 面板使用遮罩层，遮罩点击可关闭；同时必须有明确“关闭”按钮。
+4. PRD 内容区需支持滚动，遮罩层不滚动；面板层级需高于页面弹窗（建议 z-index >= 600）。
+5. PRD 内容必须按 Markdown 结构化渲染（至少支持标题、列表、表格、代码块、引用块）。
+6. 页面与 PRD 的对应关系必须使用“路由映射表”，不允许仅靠模糊匹配文件名。
+7. 路由未命中时，必须显示：`未找到该页面对应的 PRD 文件`。
+
+推荐目录：
+
+```text
+src/prd_docs/                 # 页面 PRD 文件（前端可直接读取）
+src/prd_docs/route-map.(ts|js|json)
+```
+
+如果当前仓库不需要页面内 PRD 展示（仅做文档维护），可以跳过本节。

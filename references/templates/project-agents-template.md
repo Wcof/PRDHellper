@@ -19,23 +19,24 @@
 所有真实项目 PRD 产物必须输出到：
 
 ```text
-docs/product/
+{PRD_ROOT}/
 ```
 
 目录说明：
 
 ```text
-docs/product/00-项目上下文.md
-docs/product/01-页面路由清单.md
-docs/product/02-功能清单.md
-docs/product/03-全局交互规则.md
-docs/product/04-PRD编写规范.md
-docs/product/system-prd/
-docs/product/pages/
-docs/product/changelog/
-docs/product/audit/
-docs/product/imports/
-docs/product/templates/
+{PRD_ROOT}/00-项目上下文.md
+{PRD_ROOT}/01-页面路由清单.md
+{PRD_ROOT}/02-功能清单.md
+{PRD_ROOT}/03-全局交互规则.md
+{PRD_ROOT}/04-PRD编写规范.md
+{PRD_ROOT}/system-prd/
+{PRD_ROOT}/pages/
+{PRD_ROOT}/changelog/
+{PRD_ROOT}/audit/
+{PRD_ROOT}/imports/
+{PRD_ROOT}/templates/
+{PRD_ROOT}/.index/traceability.json
 ```
 
 ## 页面 PRD 命名规则
@@ -43,8 +44,8 @@ docs/product/templates/
 路由 `/management/dispatch/center` 对应：
 
 ```text
-docs/product/pages/management-dispatch-center.md
-docs/product/changelog/management-dispatch-center-change.md
+{PRD_ROOT}/pages/management-dispatch-center.md
+{PRD_ROOT}/changelog/management-dispatch-center-change.md
 ```
 
 ## 每次修改页面后的强制规则
@@ -54,6 +55,14 @@ docs/product/changelog/management-dispatch-center-change.md
 必须同步 PRD 的情况：新增/删除功能、修改字段、按钮、筛选条件、页面结构、交互流程、状态流转、权限规则、数据展示逻辑、异常处理、入口、跳转、mock 数据结构、业务规则。
 
 纯视觉样式优化可以不更新 PRD 主体，但必须更新页面变更记录。
+
+每次页面变更后，至少执行一次：
+
+```bash
+python scripts/prdctl.py diff-sync . --staged --prd-root {PRD_ROOT}
+python scripts/prdctl.py sync . --from-code --prd-root {PRD_ROOT}
+python scripts/prdctl.py audit . --level strict --prd-root {PRD_ROOT}
+```
 
 ## 新增页面规则
 
@@ -65,6 +74,16 @@ docs/product/changelog/management-dispatch-center-change.md
 4. 页面变更记录
 5. 页面路由清单
 6. 功能清单
+
+## 页面内 PRD 查看器（可选但推荐）
+
+如果项目是前端原型并且需要“页面内直接查看 PRD”，默认采用以下交互：
+
+1. 页面右下角固定 `PRD` 按钮。
+2. 点击按钮打开/关闭 PRD 遮罩面板。
+3. 遮罩点击可关闭，并保留明确关闭按钮。
+4. 使用路由映射表读取当前页面对应 PRD；未命中时提示：`未找到该页面对应的 PRD 文件`。
+5. PRD 内容按 Markdown 结构化渲染，不允许纯文本堆叠。
 
 ## 完成输出格式
 

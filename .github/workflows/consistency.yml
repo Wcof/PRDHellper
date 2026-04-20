@@ -1,0 +1,47 @@
+name: PRD Consistency
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  consistency:
+    runs-on: ubuntu-latest
+    env:
+      CHECK_MODE: warn
+      PRD_ROOT: docs/product
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run consistency checks (warn mode)
+        run: |
+          bash scripts/check_consistency.sh .
+
+  consistency-strict:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      CHECK_MODE: strict
+      PRD_ROOT: docs/product
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run consistency checks (strict mode)
+        run: |
+          bash scripts/check_consistency.sh .
