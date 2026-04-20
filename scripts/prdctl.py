@@ -134,23 +134,63 @@ def dump_frontmatter(meta: Dict[str, Any], body: str) -> str:
     return "\n".join(lines) + "\n" + body.lstrip("\n")
 
 
-def parse_markdown_table(text: str) -> Tuple[List[str], List[Dict[str, str]]]:
-    headers: List[str] = []
+def _split_table_blocks(text: str) -> List[List[str]]:
+    blocks: List[List[str]] = []
+    current: List[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("|"):
+            current.append(line)
+            continue
+        if current:
+            blocks.append(current)
+            current = []
+    if current:
+        blocks.append(current)
+    return blocks
+
+
+def _parse_table_block(lines: List[str]) -> Tuple[List[str], List[Dict[str, str]]]:
+    if len(lines) < 2:
+        return [], []
+    headers = [c.strip() for c in lines[0].strip("|").split("|")]
+    sep = [c.strip() for c in lines[1].strip("|").split("|")]
+    if not headers or not all(re.fullmatch(r"-+", c) for c in sep):
+        return [], []
     rows: List[Dict[str, str]] = []
-    for line in text.splitlines():
-        line = line.strip()
-        if not line.startswith("|"):
-            continue
+    for line in lines[2:]:
         cols = [c.strip() for c in line.strip("|").split("|")]
-        if not headers:
-            headers = cols
-            continue
-        if all(re.fullmatch(r"-+", c) for c in cols):
-            continue
         if len(cols) < len(headers):
             cols.extend([""] * (len(headers) - len(cols)))
         rows.append({headers[i]: cols[i] for i in range(len(headers))})
     return headers, rows
+
+
+def parse_markdown_table(text: str, required_headers: Optional[List[str]] = None) -> Tuple[List[str], List[Dict[str, str]]]:
+    blocks = _split_table_blocks(text)
+    if not blocks:
+        return [], []
+
+    parsed: List[Tuple[List[str], List[Dict[str, str]]]] = []
+    for block in blocks:
+        headers, rows = _parse_table_block(block)
+        if headers:
+            parsed.append((headers, rows))
+    if not parsed:
+        return [], []
+
+    if not required_headers:
+        return parsed[0]
+
+    req = set(required_headers)
+    best_score = -1
+    best: Tuple[List[str], List[Dict[str, str]]] = ([], [])
+    for headers, rows in parsed:
+        score = len(req.intersection(set(headers)))
+        if score > best_score:
+            best_score = score
+            best = (headers, rows)
+    return best
 
 
 def markdown_table(headers: List[str], rows: List[List[str]]) -> str:
@@ -168,6 +208,30 @@ def normalize_list(value: Any) -> List[str]:
     if not value:
         return []
     return [str(value).strip()]
+
+
+def normalize_id_list(value: Any) -> List[str]:
+    if isinstance(value, list):
+        parts = [str(x).strip() for x in value if str(x).strip()]
+    elif value:
+        parts = [str(value).strip()]
+    else:
+        parts = []
+    out: List[str] = []
+    for part in parts:
+        for token in re.split(r"[,，;\n]+", part):
+            v = token.strip().strip("`")
+            if v:
+                out.append(v)
+    return sorted(set(out))
+
+
+def is_placeholder(value: str) -> bool:
+    raw = parse_backticked(value).strip()
+    if not raw:
+        return True
+    upper = raw.upper()
+    return raw.startswith("[TODO") or "TODO" in upper
 
 
 def parse_backticked(value: str) -> str:
@@ -373,11 +437,11 @@ def create_page_prd(
 def load_existing_route_map(route_inventory: Path) -> Dict[str, Dict[str, str]]:
     if not route_inventory.exists():
         return {}
-    _, rows = parse_markdown_table(safe_read(route_inventory))
+    _, rows = parse_markdown_table(safe_read(route_inventory), required_headers=["route", "page_id"])
     route_map: Dict[str, Dict[str, str]] = {}
     for row in rows:
         route = parse_backticked(row.get("页面路由", row.get("route", "")))
-        if route:
+        if route and not is_placeholder(route):
             route_map[route] = row
     return route_map
 
@@ -411,12 +475,15 @@ def write_route_inventory(out_path: Path, items: List[RouteItem], route_map: Dic
 def load_feature_rows(path: Path) -> List[Dict[str, str]]:
     if not path.exists():
         return []
-    _, rows = parse_markdown_table(safe_read(path))
+    _, rows = parse_markdown_table(safe_read(path), required_headers=["feature_id", "owner_page_id", "status"])
     normalized = []
     for row in rows:
+        feature_id = row.get("feature_id", "").strip()
+        if is_placeholder(feature_id):
+            continue
         normalized.append(
             {
-                "feature_id": row.get("feature_id", "").strip(),
+                "feature_id": feature_id,
                 "owner_page_id": row.get("owner_page_id", "").strip(),
                 "status": row.get("status", "todo").strip() or "todo",
                 "一级菜单": row.get("一级菜单", "[TODO]").strip() or "[TODO]",
@@ -443,7 +510,7 @@ def ensure_changelog_row(path: Path, change_id: str, page_id: str, feature_ids: 
                 encoding="utf-8",
             )
     text = safe_read(path)
-    headers, rows = parse_markdown_table(text)
+    headers, rows = parse_markdown_table(text, required_headers=["change_id"])
     if not headers:
         headers = ["change_id", "affected_page_ids", "affected_feature_ids", "source_commit", "版本", "日期", "修改类型", "修改内容", "影响范围", "是否同步 PRD", "备注"]
     has = False
@@ -490,7 +557,12 @@ def ensure_changelog_row(path: Path, change_id: str, page_id: str, feature_ids: 
 
 def get_git_head(project_root: Path) -> str:
     try:
-        out = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=str(project_root), text=True)
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(project_root),
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
         return out.strip()
     except Exception:
         return "unknown"
@@ -507,8 +579,8 @@ def collect_page_docs(project_root: Path, prd_root: str) -> Dict[str, Dict[str, 
         route = str(meta.get("route", f"/{slug}"))
         page_id = str(meta.get("page_id", make_page_id(route)))
         code_paths = normalize_list(meta.get("code_paths"))
-        feature_ids = normalize_list(meta.get("feature_ids"))
-        change_ids = normalize_list(meta.get("change_ids"))
+        feature_ids = normalize_id_list(meta.get("feature_ids"))
+        change_ids = normalize_id_list(meta.get("change_ids"))
         pages[page_id] = {
             "page_id": page_id,
             "route": route,
@@ -524,14 +596,14 @@ def collect_page_docs(project_root: Path, prd_root: str) -> Dict[str, Dict[str, 
 
 def collect_routes(project_root: Path, prd_root: str) -> Dict[str, Dict[str, str]]:
     route_file = project_root / prd_root / "01-页面路由清单.md"
-    _, rows = parse_markdown_table(safe_read(route_file))
+    _, rows = parse_markdown_table(safe_read(route_file), required_headers=["page_id", "route"])
     result = {}
     for r in rows:
         route = parse_backticked(r.get("route", r.get("页面路由", "")))
-        if not route:
+        if not route or is_placeholder(route):
             continue
         page_id = r.get("page_id", "").strip()
-        if not page_id:
+        if not page_id or is_placeholder(page_id):
             page_id = make_page_id(route)
         result[page_id] = {
             "page_id": page_id,
@@ -552,10 +624,10 @@ def collect_changes(project_root: Path, prd_root: str) -> Dict[str, Dict[str, st
     changes: Dict[str, Dict[str, str]] = {}
     changelog_dir = project_root / prd_root / "changelog"
     for file in sorted(changelog_dir.glob("*.md")):
-        _, rows = parse_markdown_table(safe_read(file))
+        _, rows = parse_markdown_table(safe_read(file), required_headers=["change_id"])
         for row in rows:
             cid = row.get("change_id", "").strip()
-            if not cid:
+            if not cid or is_placeholder(cid):
                 continue
             changes[cid] = {
                 "change_id": cid,
@@ -653,6 +725,33 @@ def cmd_sync(args: argparse.Namespace) -> None:
         print(f"sync --from-code 完成，处理页面: {len(items)}")
 
     if args.from_prd:
+        pages_dir = docs / "pages"
+        for page_file in sorted(pages_dir.glob("*.md")):
+            text = safe_read(page_file)
+            meta, _ = parse_frontmatter(text)
+            slug = page_file.stem
+            route = str(meta.get("route", f"/{slug}")).strip() or f"/{slug}"
+            page_id = str(meta.get("page_id", "")).strip() or make_page_id(route)
+            code_paths = normalize_list(meta.get("code_paths"))
+            if not code_paths:
+                code_paths = [f"[TODO: 补充页面代码路径/{slug}]"]
+            feature_ids = normalize_id_list(meta.get("feature_ids"))
+            if not feature_ids:
+                feature_ids = [make_feature_id(route)]
+            change_ids = normalize_id_list(meta.get("change_ids"))
+            if not change_ids:
+                change_ids = [make_change_id(route)]
+            upsert_frontmatter(
+                page_file,
+                {
+                    "page_id": page_id,
+                    "route": route,
+                    "code_paths": code_paths,
+                    "feature_ids": feature_ids,
+                    "change_ids": change_ids,
+                    "last_synced_at": TODAY,
+                },
+            )
         pages = collect_page_docs(root, prd_root=args.prd_root)
         feature_rows = load_feature_rows(feature_file)
         feature_ids = {r["feature_id"] for r in feature_rows}

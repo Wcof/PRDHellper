@@ -223,6 +223,11 @@ python .agents/skills/create-prd/scripts/prdctl.py sync . --from-code
 python .agents/skills/create-prd/scripts/prdctl.py sync . --from-prd
 ```
 
+说明：
+1. `--from-prd` 现在会自动补齐页面 PRD 的 traceability frontmatter（`page_id/route/code_paths/feature_ids/change_ids/last_synced_at`）。
+2. 严格审计会自动忽略模板中的 `[TODO: ...]` 占位行，减少初始化阶段误报。
+3. 对包含多张表格的文档（例如功能清单附加说明）会优先解析目标表头，避免串表导致 `owner_page_id` 误判。
+
 页面内 PRD 查看器（右下角 PRD 按钮，按路由查看当前页面 PRD）：
 
 ```text

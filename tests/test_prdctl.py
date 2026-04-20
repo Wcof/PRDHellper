@@ -196,3 +196,88 @@ def test_run_git_diff_non_repo_is_silent(tmp_path: Path):
     mod = load_prdctl_module()
     changed = mod.run_git_diff(tmp_path, staged=True)
     assert changed == []
+
+
+def test_parse_markdown_table_prefers_required_headers():
+    mod = load_prdctl_module()
+    text = """# 功能清单
+
+| feature_id | owner_page_id | status |
+|---|---|---|
+| feat-a | page-a | todo |
+
+## 说明
+
+| 名称 | 值 |
+|---|---|
+| x | y |
+"""
+    headers, rows = mod.parse_markdown_table(text, required_headers=["feature_id", "owner_page_id"])
+    assert headers == ["feature_id", "owner_page_id", "status"]
+    assert len(rows) == 1
+    assert rows[0]["feature_id"] == "feat-a"
+
+
+def test_collectors_ignore_placeholder_rows(tmp_path: Path):
+    run_cli("init-project", str(tmp_path), "--mode", "greenfield")
+    feature = tmp_path / "docs/product/02-功能清单.md"
+    feature.write_text(
+        """# 功能清单
+
+| feature_id | owner_page_id | status | 一级菜单 | 二级页面 | 三级功能 |
+|---|---|---|---|---|---|
+| [TODO: feat-xxx] | [TODO: page-xxx] | todo | [TODO] | [TODO] | [TODO] |
+| feat-real | page-real | done | A | B | C |
+""",
+        encoding="utf-8",
+    )
+    route = tmp_path / "docs/product/01-页面路由清单.md"
+    route.write_text(
+        """# 页面路由清单
+
+| page_id | 所属模块 | 页面名称 | route | code_path | prd_path | 当前状态 |
+|---|---|---|---|---|---|---|
+| [TODO: page-xxx] | [TODO] | [TODO] | [TODO] | [TODO] | [TODO] | 待确认 |
+| page-real | m | n | `/real` | `src/real.ts` | `docs/product/pages/real.md` | done |
+""",
+        encoding="utf-8",
+    )
+
+    mod = load_prdctl_module()
+    feature_rows = mod.load_feature_rows(feature)
+    assert len(feature_rows) == 1
+    assert feature_rows[0]["feature_id"] == "feat-real"
+    routes = mod.collect_routes(tmp_path, "docs/product")
+    assert "page-real" in routes
+    assert all("TODO" not in k for k in routes.keys())
+
+
+def test_sync_from_prd_repairs_missing_frontmatter_fields(tmp_path: Path):
+    run_cli("init-project", str(tmp_path), "--mode", "greenfield")
+    page = tmp_path / "docs/product/pages/minimal.md"
+    page.write_text(
+        """---
+route: /minimal
+---
+# 页面 PRD：最小页
+
+## 1. 页面基础信息
+## 2. 页面目标
+## 3. 页面结构
+## 4. 字段说明
+## 5. 操作说明
+## 6. 交互规则
+## 7. 状态流转
+## 8. 异常场景
+## 9. 权限规则
+## 10. 数据规则
+## 11. 验收标准
+""",
+        encoding="utf-8",
+    )
+    result = run_cli("sync", str(tmp_path), "--from-prd")
+    assert result.returncode == 0, result.stderr
+    text = page.read_text(encoding="utf-8")
+    assert "page_id: page-minimal" in text
+    assert "feature_ids: [\"feat-minimal-core\"]" in text
+    assert "change_ids: [\"chg-minimal-init\"]" in text
