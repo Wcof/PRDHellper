@@ -1,0 +1,61 @@
+modes:
+  system-prd:
+    description: 生成完整 14 章系统级 B 端 PRD。
+    output: docs/product/system-prd/{project-name}-PRD.md
+  greenfield-page-sync:
+    description: 从零到一新项目，页面创建/修改后同步页面 PRD。
+    output:
+      - docs/product/pages/{route-slug}.md
+      - docs/product/changelog/{route-slug}-change.md
+      - docs/product/02-功能清单.md
+  existing-code-init:
+    description: 已有 code 原型项目初始化 PRD 体系。
+    output:
+      - docs/product/00-项目上下文.md
+      - docs/product/01-页面路由清单.md
+      - docs/product/02-功能清单.md
+      - docs/product/pages/*.md
+  axure-html-import:
+    description: 读取 Axure 导出 HTML，逐页面反向生成 PRD。
+    input: axure-html-root
+    output:
+      - docs/product/imports/axure-pages.md
+      - docs/product/pages/*.md
+  consistency-audit:
+    description: 检查页面代码/HTML 与 PRD 是否一致。
+    output: docs/product/audit/{date}-consistency-audit.md
+page_prd_required_sections:
+  - 页面基础信息
+  - 页面目标
+  - 页面结构
+  - 字段说明
+  - 操作说明
+  - 交互规则
+  - 状态流转
+  - 异常场景
+  - 权限规则
+  - 数据规则
+  - 验收标准
+sync_required_when:
+  - 新增功能
+  - 删除功能
+  - 修改字段
+  - 修改按钮
+  - 修改筛选条件
+  - 修改页面结构
+  - 修改交互流程
+  - 修改状态流转
+  - 修改权限规则
+  - 修改数据展示逻辑
+  - 修改异常处理
+  - 修改页面入口
+  - 修改跳转关系
+  - 修改 mock 数据结构
+  - 修改业务规则
+visual_only_changes:
+  - 间距优化
+  - 颜色优化
+  - 字体优化
+  - 卡片样式优化
+  - 图表视觉优化
+  - 无业务含义的布局微调

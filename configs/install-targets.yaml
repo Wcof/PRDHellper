@@ -1,0 +1,13 @@
+install_targets:
+  codex_repo:
+    path: .agents/skills/create-prd
+    description: 推荐方式。随业务项目提交，Codex 在仓库中自动发现。
+  claude_code_user:
+    path: ~/.claude/skills/create-prd
+    description: Claude Code 用户级技能安装目录。
+  generic_prompt:
+    path: dist/create-prd-universal-prompt.md
+    description: 任意大模型可复制粘贴使用的完整 Prompt。
+  project_docs:
+    path: docs/product
+    description: 业务项目真实 PRD 产物目录，不存放 Skill 源码。

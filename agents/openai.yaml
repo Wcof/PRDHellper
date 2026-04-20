@@ -1,0 +1,17 @@
+version: 1
+name: create-prd
+summary: 工程化 PRD 生成、页面级 PRD 同步、Axure HTML 反向生成 PRD、代码与 PRD 一致性审计。
+license: MIT
+entrypoint: SKILL.md
+tags:
+  - product-management
+  - prd
+  - codex
+  - prototype
+  - axure
+  - documentation
+recommended_context:
+  - AGENTS.md
+  - docs/product/00-项目上下文.md
+  - docs/product/01-页面路由清单.md
+  - docs/product/02-功能清单.md
