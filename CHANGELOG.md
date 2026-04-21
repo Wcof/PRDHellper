@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.4.1-root-cleanup
+
+- 根目录安装入口统一为 `install.py`（跨平台自动识别系统）。
+- 移除多端分散安装脚本：`i`、`install.sh`、`install.command`、`install.ps1`、`install.bat`。
+- `scripts/install_skill.py` 默认项目路径改为当前工作目录，避免跨目录执行时装错位置。
+- README 安装章节改为“单入口 + 一键安装”说明，根目录更简洁。
+
 ## v0.4.0-traceability-loop
 
 - 主模板内置化：将 `create-prd-skill` 主模板/主规范内置到 `main-template/create-prd-skill-main`，不再依赖外部绝对路径。

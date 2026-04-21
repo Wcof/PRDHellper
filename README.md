@@ -93,30 +93,29 @@ configs/template-policy.yaml
 
 ## 4. 安装方式
 
-### 推荐：一步向导安装（最简单）
+### 推荐：统一一键安装（跨平台）
 
-按你的系统选择一个入口即可：
-
-```text
-macOS 双击：install.command
-macOS/Linux 命令行：./i 或 ./install.sh
-Windows 双击：install.bat
-Windows PowerShell：.\install.ps1
-```
-
-下载后进入本项目目录，命令行可直接执行：
+根目录只保留一个安装入口：
 
 ```bash
-./i
+python3 install.py
 ```
 
-或直接双击根目录文件：
+Windows 也使用同一个入口：
 
-```text
-install.command
+```powershell
+py -3 install.py
 ```
 
-向导会引导你：
+安装器会自动识别当前系统（macOS / Linux / Windows），并进入一键模式：只需选择安装场景（已有代码/新项目/Axure/全局），其余参数自动完成（自动安装、自动初始化、重复安装默认重装 Skill）。
+
+如需完整向导（逐项配置）：
+
+```bash
+python3 install.py --wizard
+```
+
+完整向导会引导你：
 
 1. 选择安装到“当前项目”还是“全局”；
 2. 若选当前项目：默认目标是 **skill 目录的上一级**（适合“把本文件夹拖进项目里”）；

@@ -40,11 +40,7 @@ def _mode_to_project_init_mode(mode: str) -> str:
 
 
 def _default_project_root() -> Path:
-    skill_root = Path(__file__).resolve().parents[1]
-    cwd = Path.cwd().resolve()
-    if cwd == skill_root:
-        return skill_root.parent
-    return cwd
+    return Path.cwd().resolve()
 
 
 def _current_install_dir(project_root: Path) -> Path:
@@ -328,10 +324,67 @@ def run_wizard(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_one_click(args: argparse.Namespace) -> int:
+    """
+    一键安装：仅选择模式，其他参数全部采用安全默认值并直接执行。
+    """
+    mode = args.quick_mode
+    if not mode:
+        print("== create-prd 一键安装 ==")
+        print("请选择安装场景：")
+        print("1) 当前项目（已有代码，推荐）")
+        print("2) 当前项目（新项目）")
+        print("3) 当前项目（Axure HTML）")
+        print("4) 全局安装（Claude 用户目录）")
+        choice = _ask("输入 1/2/3/4", "1")
+        mode = {"1": "existing-code", "2": "greenfield", "3": "axure", "4": "global"}.get(choice, "existing-code")
+
+    if mode == "global":
+        auto_args = argparse.Namespace(
+            scope="global",
+            project_root=None,
+            prd_root=args.prd_root,
+            init_project=False,
+            init_mode="greenfield",
+            force=True,
+            on_existing=args.on_existing or "reinstall",
+            yes=True,
+            one_click=False,
+            quick_mode=None,
+            reset_docs=False,
+        )
+        return run_wizard(auto_args)
+
+    project_root = Path(args.project_root or Path.cwd()).resolve()
+    on_existing = args.on_existing or ("reinstall-reset" if args.reset_docs else "reinstall")
+    auto_args = argparse.Namespace(
+        scope="current",
+        project_root=str(project_root),
+        prd_root=args.prd_root,
+        init_project=True,
+        init_mode=mode,
+        force=True,
+        on_existing=on_existing,
+        yes=True,
+        one_click=False,
+        quick_mode=None,
+        reset_docs=args.reset_docs,
+    )
+    return run_wizard(auto_args)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="create-prd 安装向导")
+    p.add_argument("--one-click", action="store_true", help="一键安装：只选模式，其他配置使用默认值并自动执行")
+    p.add_argument(
+        "--quick-mode",
+        choices=["existing-code", "greenfield", "axure", "global"],
+        default=None,
+        help="一键安装模式（不传则交互选择）",
+    )
+    p.add_argument("--reset-docs", action="store_true", help="一键安装时重置并迁移 PRD 文档（等价 on-existing=reinstall-reset）")
     p.add_argument("--scope", choices=["current", "global"], help="安装范围（不传则进入向导）")
-    p.add_argument("--project-root", default=None, help="当前项目路径（scope=current 时有效；默认优先取 skill 上一级目录）")
+    p.add_argument("--project-root", default=None, help="当前项目路径（scope=current 时有效；默认使用当前工作目录）")
     p.add_argument("--prd-root", default="docs/product", help="当前项目 PRD 根目录")
     p.add_argument("--init-project", action="store_true", help="安装后立即初始化 PRD 目录（默认交互模式下为是）")
     p.add_argument("--init-mode", choices=["greenfield", "existing-code", "axure"], default="greenfield", help="初始化模式")
@@ -344,7 +397,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    code = run_wizard(args)
+    code = run_one_click(args) if args.one_click else run_wizard(args)
     raise SystemExit(code)
 
 
