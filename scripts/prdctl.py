@@ -840,6 +840,24 @@ def extract_ui_terms(raw: str) -> Tuple[List[str], List[str], List[str]]:
     return sorted(set(chunks))[:80], sorted(set(buttons))[:40], sorted(set(inputs))[:40]
 
 
+def is_auxiliary_axure_html(path: Path, html_root: Path) -> bool:
+    try:
+        rel = path.relative_to(html_root)
+    except ValueError:
+        rel = path
+    rel_posix = rel.as_posix()
+    lower = rel_posix.lower()
+    name = path.name.lower()
+
+    if lower.startswith(("resources/", "plugins/", "data/", "images/")):
+        return True
+
+    if name in {"index.html", "start.html", "start_c_1.html", "start_with_pages.html"}:
+        return True
+
+    return False
+
+
 def cmd_scan_axure(args: argparse.Namespace) -> None:
     html_root = Path(args.html_root).resolve()
     project_root = Path(args.project_root).resolve() if args.project_root else Path.cwd().resolve()
@@ -848,6 +866,8 @@ def cmd_scan_axure(args: argparse.Namespace) -> None:
         out_path = project_root / out_path
     pages = []
     for f in html_root.rglob("*.html"):
+        if is_auxiliary_axure_html(f, html_root):
+            continue
         raw = safe_read(f, limit=1_000_000)
         title = extract_title(raw, f.stem)
         rel = str(f.relative_to(html_root))

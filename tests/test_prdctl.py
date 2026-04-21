@@ -252,6 +252,35 @@ def test_collectors_ignore_placeholder_rows(tmp_path: Path):
     assert all("TODO" not in k for k in routes.keys())
 
 
+def test_scan_axure_skips_auxiliary_export_pages(tmp_path: Path):
+    html_root = tmp_path / "axure"
+    (html_root / "resources" / "chrome").mkdir(parents=True)
+    (html_root / "index.html").write_text("<html><head><title>Untitled Document</title></head></html>", encoding="utf-8")
+    (html_root / "start.html").write_text("<html><head><title>start</title></head></html>", encoding="utf-8")
+    (html_root / "resources" / "reload.html").write_text("<html><head><title>reload</title></head></html>", encoding="utf-8")
+    (html_root / "resources" / "chrome" / "chrome.html").write_text(
+        "<html><head><title>Install extension</title></head></html>",
+        encoding="utf-8",
+    )
+    (html_root / "业务页面.html").write_text(
+        "<html><head><title>业务页面</title></head><body><button>保存</button></body></html>",
+        encoding="utf-8",
+    )
+
+    run_cli("scan-axure", str(html_root), "--project-root", str(tmp_path), "--create-prd")
+
+    report = (tmp_path / "docs/product/imports/axure-pages.md").read_text(encoding="utf-8")
+    assert "业务页面" in report
+    assert "index.html" not in report
+    assert "start.html" not in report
+    assert "reload.html" not in report
+    assert "chrome.html" not in report
+
+    pages_dir = tmp_path / "docs/product/pages"
+    generated = sorted(p.name for p in pages_dir.glob("*.md"))
+    assert generated == ["业务页面.md"]
+
+
 def test_sync_from_prd_repairs_missing_frontmatter_fields(tmp_path: Path):
     run_cli("init-project", str(tmp_path), "--mode", "greenfield")
     page = tmp_path / "docs/product/pages/minimal.md"
