@@ -1088,9 +1088,17 @@ def cmd_install(args: argparse.Namespace) -> None:
     if dest.exists() and args.force:
         shutil.rmtree(dest)
     dest.mkdir(parents=True, exist_ok=True)
+    skip_names = {".git", ".agents", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".DS_Store"}
     for item in SKILL_ROOT.iterdir():
-        if item.name in {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".DS_Store"}:
+        if item.name in skip_names:
             continue
+        # 防止目标目录位于源目录之下时发生递归自拷贝。
+        if item.is_dir():
+            try:
+                dest.relative_to(item)
+                continue
+            except ValueError:
+                pass
         target_item = dest / item.name
         if item.is_dir():
             if target_item.exists():
@@ -1098,7 +1106,9 @@ def cmd_install(args: argparse.Namespace) -> None:
             shutil.copytree(
                 item,
                 target_item,
-                ignore=shutil.ignore_patterns("__pycache__", ".DS_Store", ".pytest_cache", ".mypy_cache", ".ruff_cache"),
+                ignore=shutil.ignore_patterns(
+                    "__pycache__", ".DS_Store", ".agents", ".pytest_cache", ".mypy_cache", ".ruff_cache"
+                ),
             )
         else:
             shutil.copy2(item, target_item)
