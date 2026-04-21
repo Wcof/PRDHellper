@@ -20,6 +20,35 @@ Script 层：scripts/prdctl.py 提供初始化、扫描、审计命令
 Project Docs 层：业务项目 docs/product 存放真实 PRD 产物
 ```
 
+## 主模板策略（重要）
+
+当前主模板与主规范固定以：
+
+```text
+main-template/create-prd-skill-main
+```
+
+为准。
+
+本仓库（PRDHellper）定位为：
+1. 安装与工程化脚手架
+2. 一致性检查与同步工具
+3. 扩展入口（不替代主模板）
+
+扩展入口目录：
+
+```text
+references/templates/extensions/
+```
+
+策略配置见：
+
+```text
+configs/template-policy.yaml
+```
+
+补充：`scripts/build.py` 会按 `template-policy.yaml` 的 `main_template_source` 优先读取主规范，再叠加本仓工程化附录与模板。
+
 ## 2. 支持模式
 
 | 模式 | 适用场景 | 产物 |
@@ -64,27 +93,100 @@ Project Docs 层：业务项目 docs/product 存放真实 PRD 产物
 
 ## 4. 安装方式
 
-### 方式一：安装到 Codex 当前业务项目（推荐）
+### 推荐：统一一键安装（跨平台）
 
-在 create-prd-skill 目录执行：
+根目录只保留一个安装入口：
 
 ```bash
-python scripts/prdctl.py install /path/to/your-project --mode codex-repo --force
+python3 install.py
 ```
 
-安装后业务项目会出现：
+Windows 也使用同一个入口：
+
+```powershell
+py -3 install.py
+```
+
+macOS 小白用户可直接双击：
+
+```text
+install.command
+```
+
+Windows 小白用户可直接双击：
+
+```text
+install.bat
+```
+
+安装器会自动识别当前系统（macOS / Linux / Windows），并进入一键模式：只需选择安装场景（已有代码/新项目/Axure/全局），其余参数自动完成（自动安装、自动初始化、重复安装默认重装 Skill）。
+
+如需完整向导（逐项配置）：
+
+```bash
+python3 install.py --wizard
+```
+
+完整向导会引导你：
+
+1. 选择安装到“当前项目”还是“全局”；
+2. 若选当前项目：默认目标是 **当前工作目录**；
+3. 确认 PRD 文档目录名（默认 `docs/product`，可改成 `docs/prd` 等）；
+4. 该目录会 **自动创建**，无需手动创建；
+5. 初始化默认开启，并用中文提示模式含义（新项目 / 已有代码 / Axure）。
+
+### 重复安装处理
+
+若检测到已经安装过，向导会让你选择：
+
+1. 保留现状（跳过）
+2. 仅重装 Skill（不动已有文档）
+3. 重装 Skill + 重置文档并自动迁移历史文件（会先备份，再生成迁移报告）
+
+当你选择“跳过”或“安装后不初始化（中途安装）”时，会自动生成一个可复制给 AI 的唤醒词文件：
+
+```text
+AI-PRD-WAKEUP-PROMPT.md
+```
+
+如果你在安装时选择了“已有代码项目”模式，也会自动生成该唤醒词，用于让 AI 直接执行“已有页面补全 PRD”。
+
+安装到当前项目后会出现：
 
 ```text
 .agents/skills/create-prd/
 ```
 
-### 方式二：Claude Code 用户级安装
+### 非交互安装（CI/脚本）
+
+安装到当前项目并初始化：
 
 ```bash
-python scripts/prdctl.py install --mode claude-user --force
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --force
 ```
 
-### 方式三：任意大模型复制 Prompt
+检测到重复安装时，指定策略：
+
+```bash
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --on-existing skip
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --on-existing reinstall
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --on-existing reinstall-reset
+```
+
+全局安装（Claude 用户级）：
+
+```bash
+python3 scripts/install_skill.py --scope global --yes --force
+```
+
+### 兼容旧命令（可选）
+
+```bash
+python3 scripts/prdctl.py install /path/to/your-project --mode codex-repo --force
+python3 scripts/prdctl.py install --mode claude-user --force
+```
+
+### 任意大模型复制 Prompt
 
 ```bash
 python scripts/build.py
@@ -118,10 +220,42 @@ python .agents/skills/create-prd/scripts/prdctl.py init-project . --mode axure
 python .agents/skills/create-prd/scripts/prdctl.py scan-axure ./axure-html --project-root . --create-prd
 ```
 
-轻量一致性审计：
+一致性审计（基础 / 严格）：
 
 ```bash
-python .agents/skills/create-prd/scripts/prdctl.py audit .
+python .agents/skills/create-prd/scripts/prdctl.py audit . --level basic
+python .agents/skills/create-prd/scripts/prdctl.py audit . --level strict
+```
+
+增量同步（代码驱动 / PRD 驱动）：
+
+```bash
+python .agents/skills/create-prd/scripts/prdctl.py sync . --from-code
+python .agents/skills/create-prd/scripts/prdctl.py sync . --from-prd
+```
+
+说明：
+1. `--from-prd` 现在会自动补齐页面 PRD 的 traceability frontmatter（`page_id/route/code_paths/feature_ids/change_ids/last_synced_at`）。
+2. 严格审计会自动忽略模板中的 `[TODO: ...]` 占位行，减少初始化阶段误报。
+3. 对包含多张表格的文档（例如功能清单附加说明）会优先解析目标表头，避免串表导致 `owner_page_id` 误判。
+
+页面内 PRD 查看器（右下角 PRD 按钮，按路由查看当前页面 PRD）：
+
+```text
+参考模板：
+references/templates/prd-viewer-integration-template.md
+```
+
+Diff 驱动同步建议：
+
+```bash
+python .agents/skills/create-prd/scripts/prdctl.py diff-sync . --staged
+```
+
+如果你在安装向导里把 PRD 目录改成了非默认值（例如 `docs/prd`），请在命令后追加：
+
+```bash
+--prd-root docs/prd
 ```
 
 ## 6. 给 Codex 的推荐任务写法
@@ -187,7 +321,20 @@ examples/            # Codex 任务示例
 dist/                # 构建产物
 ```
 
-## 9. 版本说明
+## 9. 使用教程（维护与自定义）
+
+如果你后期要维护和自定义 PRD 模板，先看：
+
+```text
+docs/usage/模板自定义与维护教程.md
+```
+
+核心结论（简版）：
+1. 只改当前项目：优先改 `.agents/skills/create-prd/references/templates/`。
+2. 作为默认模板：改本仓库 `references/templates/`，然后 `python3 scripts/build.py`。
+3. 改完要验证：运行 `sync + audit --level strict`。
+
+## 10. 版本说明
 
 当前版本在原 create-prd 基础上增加工程化能力：
 
@@ -199,3 +346,4 @@ dist/                # 构建产物
 - 页面 PRD 模板
 - 页面变更记录
 - 一致性审计
+- traceability 索引（`docs/product/.index/traceability.json`）
