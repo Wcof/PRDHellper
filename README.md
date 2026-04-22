@@ -1,6 +1,6 @@
 # create-prd — 工程化 PRD Skill
 
-![create-prd 宣传图](docs/assets/create-prd-promo.svg)
+![create-prd 宣传图](docs/assets/create-prd-promo.png)
 
 > 面向产品经理的 PRD 工程化助手：支持完整系统级 PRD、code 网页原型页面 PRD 同步、已有代码项目 PRD 初始化、Axure HTML 反向生成 PRD、代码与 PRD 一致性审计。
 
