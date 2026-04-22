@@ -310,3 +310,24 @@ route: /minimal
     assert "page_id: page-minimal" in text
     assert "feature_ids: [\"feat-minimal-core\"]" in text
     assert "change_ids: [\"chg-minimal-init\"]" in text
+
+
+def test_check_consistency_harness_detects_docs_produc(tmp_path: Path):
+    docs = tmp_path / "docs" / "produc"
+    (docs / "pages").mkdir(parents=True)
+    (docs / "changelog").mkdir(parents=True)
+    (docs / "audit").mkdir(parents=True)
+    (docs / ".index").mkdir(parents=True)
+    (docs / "01-页面路由清单.md").write_text("# 页面路由清单\n\n", encoding="utf-8")
+    (docs / "02-功能清单.md").write_text("# 功能清单\n\n", encoding="utf-8")
+
+    script = ROOT / "scripts" / "check_consistency.sh"
+    result = subprocess.run(
+        ["bash", str(script), str(tmp_path)],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "prd_root=docs/produc" in result.stdout

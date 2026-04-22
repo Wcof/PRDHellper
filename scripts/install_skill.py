@@ -178,7 +178,7 @@ def _emit_agent_wakeup_prompt(project_root: Path, prd_root: str, reason: str, sc
             "1. 阅读 `AGENTS.md` 与 `.agents/skills/create-prd/SKILL.md`。",
             "2. 扫描现有路由和页面，并补齐页面 PRD / 功能清单 / 变更记录。",
             f"3. 重点补齐目录：`{prd_root}/pages`、`{prd_root}/02-功能清单.md`、`{prd_root}/changelog`。",
-            f"4. 执行并汇报：`python .agents/skills/create-prd/scripts/prdctl.py scan-code . --create-prd --prd-root {prd_root}`、`python .agents/skills/create-prd/scripts/prdctl.py audit . --level strict --prd-root {prd_root}`。",
+            f"4. 执行并汇报：`python .agents/skills/create-prd/scripts/prdctl.py scan-code . --create-prd --prd-root {prd_root}`、`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。该入口会自动同步再审计。",
             "5. 输出：补全了哪些页面、哪些仍待确认（TODO）。",
         ]
     else:
@@ -188,7 +188,7 @@ def _emit_agent_wakeup_prompt(project_root: Path, prd_root: str, reason: str, sc
             "1. 先阅读 `AGENTS.md` 与 `.agents/skills/create-prd/SKILL.md`。",
             f"2. 阅读 `{prd_root}` 下已有文档（至少 `00-项目上下文.md`、`01-页面路由清单.md`、`02-功能清单.md`）。",
             "3. 基于当前代码与路由，补齐或更新页面 PRD、功能清单、变更记录。",
-            f"4. 执行并汇报：`python .agents/skills/create-prd/scripts/prdctl.py audit . --level strict --prd-root {prd_root}`。",
+            f"4. 执行并汇报：`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。该入口会自动同步再审计。",
         ]
 
     prompt = "\n".join(
