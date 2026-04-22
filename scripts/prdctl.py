@@ -36,6 +36,34 @@ REQUIRED_PAGE_SECTIONS = [
     "数据规则",
     "验收标准",
 ]
+CODE_PATH_PREFIXES = (
+    "src/",
+    "app/",
+    "pages/",
+    "views/",
+    "router/",
+    "routes/",
+    "components/",
+    "layouts/",
+    "features/",
+    "modules/",
+    "store/",
+    "stores/",
+    "service/",
+    "services/",
+    "api/",
+    "mock/",
+    "mocks/",
+    "lib/",
+    "utils/",
+    "hooks/",
+    "composables/",
+    "constants/",
+    "types/",
+    "schemas/",
+    "models/",
+)
+CODE_FILE_EXTENSIONS = {".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".css", ".scss", ".sass", ".less", ".styl", ".json"}
 
 
 def route_to_slug(route: str) -> str:
@@ -55,6 +83,21 @@ def safe_read(path: Path, limit: int = 500_000) -> str:
         return data[:limit]
     except Exception:
         return ""
+
+
+def is_code_related_path(path: str, prd_root: Optional[str] = None) -> bool:
+    normalized = path.strip().replace("\\", "/")
+    if not normalized:
+        return False
+    if prd_root:
+        root_prefix = prd_root.strip("/").replace("\\", "/") + "/"
+        if normalized.startswith(root_prefix):
+            return False
+    if normalized.startswith("docs/") or normalized.endswith(".md"):
+        return False
+    if normalized.startswith(CODE_PATH_PREFIXES):
+        return True
+    return Path(normalized).suffix.lower() in CODE_FILE_EXTENSIONS
 
 
 def write_if_missing(path: Path, content: str, force: bool = False) -> bool:
@@ -961,7 +1004,7 @@ def run_git_diff(project_root: Path, base: str = "HEAD", staged: bool = False) -
 def cmd_diff_sync(args: argparse.Namespace) -> None:
     root = Path(args.project_root).resolve()
     changed = run_git_diff(root, base=args.base, staged=args.staged)
-    code_changed = [p for p in changed if p.startswith(("src/", "app/", "pages/", "router/", "routes/"))]
+    code_changed = [p for p in changed if is_code_related_path(p, prd_root=args.prd_root)]
     prd_changed = [p for p in changed if p.startswith(f"{args.prd_root}/")]
     must_sync = []
     if code_changed:
