@@ -1,15 +1,16 @@
-# Create-PRD 工程化完整独立 Prompt
+# Create-PRD 完整独立 Prompt
 
-> 本文件可在任意 LLM 中直接使用，也可作为 Codex/Claude Code Skill 的参考文本。
+> 本文件是 create-prd 技能的完整独立版本，可在任何 LLM 中直接使用。
 
-> 包含完整 14 章系统 PRD、页面级 PRD、项目初始化、Axure HTML 反向生成、代码与 PRD 同步审计规则。
+> 将本文件内容粘贴到 ChatGPT / Gemini / DeepSeek / Claude 等 LLM 中，
+> 然后提供你的业务上下文，即可生成结构化 PRD。
 
 ---
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/SKILL.md
+## SKILL
 
 # create-prd
 
@@ -164,9 +165,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/appendices/create-prd-appendix-typing.md
+## create-prd-appendix-typing
 
 # 产品定型与章节适配
 
@@ -270,9 +271,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch01-background.md
+## create-prd-ch01-background
 
 # 第1章 项目背景 — 生成指引
 
@@ -337,9 +338,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch02-basic.md
+## create-prd-ch02-basic
 
 # 第2章 需求基本情况 — 生成指引
 
@@ -415,9 +416,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch03-commercial.md
+## create-prd-ch03-commercial
 
 # 第3章 商业分析 — 生成指引
 
@@ -543,9 +544,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch04-goals.md
+## create-prd-ch04-goals
 
 # 第4章 项目收益目标 — 生成指引
 
@@ -617,9 +618,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch05-overview.md
+## create-prd-ch05-overview
 
 # 第5章 项目方案概述 — 生成指引
 
@@ -684,9 +685,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch06-scope.md
+## create-prd-ch06-scope
 
 # 第6章 项目范围 — 生成指引
 
@@ -738,9 +739,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch07-risks.md
+## create-prd-ch07-risks
 
 # 第7章 项目风险 — 生成指引
 
@@ -805,9 +806,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch08-09-terms.md
+## create-prd-ch08-09-terms
 
 # 第8-9章 术语与参考文献 — 生成指引
 
@@ -841,9 +842,9 @@ $ARGUMENTS
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch10-functions.md
+## create-prd-ch10-functions
 
 # 第10章 功能需求 — 生成指引
 
@@ -1155,9 +1156,9 @@ stateDiagram-v2
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch11-tracking.md
+## create-prd-ch11-tracking
 
 # 第11章 数据埋点 — 生成指引
 
@@ -1220,9 +1221,9 @@ stateDiagram-v2
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch12-permissions.md
+## create-prd-ch12-permissions
 
 # 第12章 角色和权限 — 生成指引
 
@@ -1352,9 +1353,9 @@ stateDiagram-v2
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch13-operations.md
+## create-prd-ch13-operations
 
 # 第13章 运营计划 — 生成指引
 
@@ -1472,9 +1473,9 @@ stateDiagram-v2
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/chapters/create-prd-ch14-tbd.md
+## create-prd-ch14-tbd
 
 # 第14章 待决事项 — 生成指引
 
@@ -1515,9 +1516,9 @@ stateDiagram-v2
 
 
 
-========================================================================
+============================================================
 
-## main-template/create-prd-skill-main/references/appendices/create-prd-appendix-selfcheck.md
+## create-prd-appendix-selfcheck
 
 # 自检与待完善清单
 
@@ -1602,726 +1603,5 @@ PRD 初稿生成后，按照 Check-PRD 的14个维度进行快速扫描，标注
    - 🟢 可选完善：对应 P3 级别的优化
 3. 每个待完善项说明：缺什么、为什么重要、建议如何获取（如"建议与销售团队沟通获取竞品信息"）。
 4. 最后提示用户完善后可以使用 `/check-prd` 进行完整评审，形成闭环。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-engineering.md
-
-# 附录：工程化使用总则
-
-create-prd 不应只是一个“生成 PRD 的提示词”，而应作为一个可复用工程能力：
-
-- Skill 层：定义 Agent 什么时候触发、按什么模式工作。
-- Template 层：提供页面 PRD、功能清单、变更记录、AGENTS.md 等标准模板。
-- Script 层：提供初始化、代码扫描、Axure HTML 扫描、一致性审计等可执行动作。
-- Project Docs 层：在业务项目中沉淀真实 PRD 产物。
-
-推荐把 Skill 安装到业务项目 `.agents/skills/create-prd/`，把真实 PRD 输出到 `docs/product/`。二者不要混在一起。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-mode-router.md
-
-# 附录：模式选择器
-
-## system-prd
-
-用户要求完整 PRD、产品方案、需求文档时使用。输出完整 14 章结构。
-
-## greenfield-page-sync
-
-从零到一 code 原型项目使用。每新增或修改页面，都根据页面代码、路由、mock 数据和对话上下文更新页面 PRD。
-
-## existing-code-init
-
-已有代码项目使用。先扫描路由和页面，建立 `docs/product` 目录、页面路由清单、功能清单和初版页面 PRD。
-
-## axure-html-import
-
-已有 Axure HTML 项目使用。递归读取 HTML 页面，提取页面文本、按钮、表单、表格、导航，按页面生成 PRD。
-
-## consistency-audit
-
-用于检查代码/HTML 和 PRD 是否一致，输出问题清单和修复建议。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-greenfield.md
-
-# 附录：从零到一新项目页面 PRD 同步
-
-## 目标
-
-让 Agent 在生成 code 网页页面后，自动生成或更新对应页面 PRD。
-
-## 输入
-
-- 用户最新对话需求
-- 页面路由
-- 页面代码
-- mock 数据
-- 项目上下文
-- 已有页面 PRD
-
-## 输出
-
-- 页面 PRD
-- 页面变更记录
-- 功能清单更新
-- 路由清单更新
-
-## 更新判断
-
-影响功能、字段、按钮、交互、状态、权限、数据逻辑、异常、路由、入口和跳转时，必须同步 PRD。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-existing-code.md
-
-# 附录：已有代码项目 PRD 初始化
-
-## 目标
-
-对已有 Vue/React/普通前端项目进行 PRD 体系初始化。
-
-## 执行步骤
-
-1. 扫描 `src/router`、`src/pages`、`src/views`、`src/components`。
-2. 推断页面路由和页面文件关系。
-3. 创建 `docs/product` 文档体系。
-4. 生成页面路由清单。
-5. 生成初版功能清单。
-6. 为主要页面生成页面级 PRD。
-7. 信息不足处标注 `[TODO]`。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-axure-html.md
-
-# 附录：Axure HTML 反向生成 PRD
-
-## 目标
-
-根据 Axure 导出的 HTML 页面，逐页解析并生成页面级 PRD。
-
-## 识别维度
-
-- 页面标题
-- 页面路径
-- 页面可见文本
-- 按钮与链接
-- 输入框和表单项
-- 表格表头
-- 导航菜单
-- 弹窗或动态面板线索
-
-## 限制
-
-HTML 很难完整还原隐藏交互、复杂状态和业务规则。凡无法确认的内容必须写 `[TODO]`。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-sync-audit.md
-
-# 附录：代码与 PRD 同步审计
-
-## 审计目标
-
-发现“页面已实现但 PRD 未描述”或“PRD 已描述但页面未实现”的问题。
-
-## 检查维度
-
-- 页面路由是否存在
-- 页面名称是否一致
-- 字段是否一致
-- 按钮是否一致
-- 筛选条件是否一致
-- 弹窗/抽屉是否一致
-- 状态流转是否一致
-- 权限规则是否一致
-- mock 数据字段是否一致
-- 功能清单是否覆盖页面入口
-
-## 输出
-
-输出不一致问题表、建议修复方式、需补充 PRD 片段。
-
-
-
-
-========================================================================
-
-## references/appendices/create-prd-appendix-mcp-integration.md
-
-# 附录：Skill / MCP / AGENTS.md 分工
-
-## AGENTS.md
-
-用于项目级稳定规则：目录结构、构建命令、PRD 同步要求、验收标准。
-
-## Skill
-
-用于可复用流程：如何初始化 PRD、如何写页面 PRD、如何解析 Axure、如何做一致性审计。
-
-## MCP
-
-当 Agent 需要访问本地仓库之外的工具时使用，例如：Figma、浏览器、内部文档、设计系统、接口平台。MCP 不替代 Skill，而是给 Skill 提供外部工具能力。
-
-## 推荐组合
-
-- 业务项目根目录：`AGENTS.md`
-- 业务项目 Skill：`.agents/skills/create-prd/`
-- 业务项目 PRD：`docs/product/`
-- 外部设计/文档工具：按需配置 MCP
-
-
-
-
-========================================================================
-
-## references/templates/axure-import-report-template.md
-
-# Axure HTML 导入报告
-
-| 页面名称 | HTML 路径 | 推断路由 | 页面 PRD | 识别置信度 | 待确认项 |
-|---|---|---|---|---|---|
-| [TODO] | [TODO] | [TODO] | [TODO] | [TODO] | [TODO] |
-
-## 导入说明
-
-本报告基于 Axure 导出的 HTML 页面结构反向识别。由于 HTML 只能体现显性页面元素，复杂业务规则、权限、状态机、接口规则需产品经理二次确认。
-
-
-
-
-========================================================================
-
-## references/templates/consistency-audit-template.md
-
-# 代码与 PRD 一致性审计
-
-## 1. 审计范围
-
-| 类型 | 路径 |
-|---|---|
-| 页面代码 | [TODO] |
-| 页面 PRD | [TODO] |
-| 功能清单 | docs/product/02-功能清单.md |
-
-## 2. 审计结论
-
-[TODO: 总体结论]
-
-## 3. 不一致问题清单
-
-| 问题类型 | 页面 | 代码/HTML 表现 | PRD 表现 | 建议修复 |
-|---|---|---|---|---|
-| [TODO] | [TODO] | [TODO] | [TODO] | [TODO] |
-
-## 4. 需要补充的 PRD 内容
-
-[TODO]
-
-## 5. 建议下一步修改任务
-
-[TODO]
-
-
-
-
-========================================================================
-
-## references/templates/feature-list-template.md
-
-# 功能清单
-
-| feature_id | owner_page_id | status | 一级菜单 | 二级页面 | 三级功能 |
-|---|---|---|---|---|---|
-| [TODO: feat-xxx] | [TODO: page-xxx] | todo | [TODO] | [TODO] | [TODO] |
-
-
-
-
-========================================================================
-
-## references/templates/page-changelog-template.md
-
-# 页面变更记录：{页面名称}
-
-| change_id | affected_page_ids | affected_feature_ids | source_commit | 版本 | 日期 | 修改类型 | 修改内容 | 影响范围 | 是否同步 PRD | 备注 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| {变更ID} | {页面ID} | {功能ID} | [TODO: commit] | v0.1 | {日期} | 初始化 | 创建页面变更记录 | 页面 PRD | 是 | 初版 |
-
-## 修改类型说明
-
-- 新增功能
-- 删除功能
-- 修改字段
-- 修改按钮
-- 修改交互
-- 修改状态
-- 修改权限
-- 修改页面结构
-- 修改数据逻辑
-- 修改视觉样式
-- 修复问题
-
-
-
-
-========================================================================
-
-## references/templates/page-prd-template.md
-
----
-page_id: {页面ID}
-route: {页面路由}
-code_paths: ["{页面文件}"]
-feature_ids: ["{功能ID}"]
-change_ids: ["{变更ID}"]
-last_synced_at: {日期}
----
-
-# 页面 PRD：{页面名称}
-
-## 1. 页面基础信息
-
-| 项目 | 内容 |
-|---|---|
-| 页面名称 | {页面名称} |
-| 页面路由 | {页面路由} |
-| 所属模块 | [TODO: 所属模块] |
-| 页面文件 | {页面文件} |
-| 使用角色 | [TODO: 使用角色] |
-| 页面定位 | [TODO: 页面定位] |
-| 上游入口 | [TODO: 上游入口] |
-| 下游页面 | [TODO: 下游页面] |
-| 当前状态 | 草稿 |
-
-## 2. 页面目标
-
-[TODO: 说明该页面解决什么问题，用户进入该页面主要完成什么任务。]
-
-## 3. 页面结构
-
-| 页面区域 | 展示内容 | 说明 |
-|---|---|---|
-| 顶部区域 | [TODO] | [TODO] |
-| 筛选区域 | [TODO] | [TODO] |
-| 主内容区域 | [TODO] | [TODO] |
-| 操作区域 | [TODO] | [TODO] |
-| 弹窗 / 抽屉 | [TODO] | [TODO] |
-
-## 4. 字段说明
-
-| 字段名称 | 字段含义 | 数据来源 | 是否必填 | 展示规则 | 备注 |
-|---|---|---|---|---|---|
-| [TODO] | [TODO] | [TODO] | [TODO] | [TODO] | [TODO] |
-
-## 5. 操作说明
-
-| 操作名称 | 触发位置 | 操作结果 | 是否二次确认 | 是否影响状态 | 备注 |
-|---|---|---|---|---|---|
-| [TODO] | [TODO] | [TODO] | [TODO] | [TODO] | [TODO] |
-
-## 6. 交互规则
-
-[TODO: 说明点击、跳转、弹窗、抽屉、表单提交、搜索、筛选、批量操作等规则。]
-
-## 7. 状态流转
-
-| 当前状态 | 可执行操作 | 操作后状态 | 页面反馈 |
-|---|---|---|---|
-| [TODO] | [TODO] | [TODO] | [TODO] |
-
-## 8. 异常场景
-
-| 异常场景 | 页面表现 | 处理方式 |
-|---|---|---|
-| 数据为空 | [TODO] | [TODO] |
-| 接口失败 | [TODO] | [TODO] |
-| 权限不足 | [TODO] | [TODO] |
-| 操作失败 | [TODO] | [TODO] |
-
-## 9. 权限规则
-
-| 角色 | 可查看 | 可新增 | 可编辑 | 可删除 | 其他限制 |
-|---|---|---|---|---|---|
-| [TODO] | [TODO] | [TODO] | [TODO] | [TODO] | [TODO] |
-
-## 10. 数据规则
-
-[TODO: 说明页面使用的数据来源、mock 数据结构、字段映射关系。]
-
-## 11. 验收标准
-
-- [ ] 页面入口正确
-- [ ] 页面结构完整
-- [ ] 字段展示完整
-- [ ] 操作按钮符合产品逻辑
-- [ ] 状态流转正确
-- [ ] 异常场景有反馈
-- [ ] 权限规则有体现
-- [ ] 页面代码与 PRD 描述一致
-
-## 12. 变更记录
-
-| change_id | affected_page_ids | affected_feature_ids | source_commit | 版本 | 日期 | 修改内容 | 是否影响 PRD | 备注 |
-|---|---|---|---|---|---|---|---|---|
-| {变更ID} | {页面ID} | {功能ID} | [TODO: commit] | v0.1 | {日期} | 初始化页面 PRD | 是 | 初版 |
-
-
-
-
-========================================================================
-
-## references/templates/prd-viewer-integration-template.md
-
-# 页面内 PRD 查看器接入模板
-
-> 目标：在页面右下角显示 `PRD` 按钮，点击后查看当前路由对应的页面 PRD。
-
-## 1) 目录建议
-
-```text
-src/prd_docs/
-├── route-map.ts
-├── management-dispatch-center.md
-└── ...
-```
-
-## 2) 路由映射表示例
-
-```ts
-// src/prd_docs/route-map.ts
-export const PRD_ROUTE_MAP: Record<string, string> = {
-  "/management/dispatch/center": "management-dispatch-center.md",
-};
-```
-
-## 3) 行为规范（必须）
-
-1. 右下角固定按钮文案：`PRD`。
-2. 点击打开 PRD 面板；再次点击关闭。
-3. 点击遮罩关闭；面板内必须有关闭按钮。
-4. 内容区滚动，遮罩不滚动。
-5. 路由未命中提示：`未找到该页面对应的 PRD 文件`。
-
-## 4) UI 建议
-
-- 浮动按钮：`position: fixed; right: 24px; bottom: 24px; z-index: 560;`
-- 遮罩层：`z-index: 600;`
-- 面板容器：`max-width: 980px; max-height: 80vh; overflow: auto;`
-
-## 5) 最低验收
-
-- [ ] 任意页面右下角可看到 `PRD` 按钮。
-- [ ] 能打开并关闭 PRD 面板（按钮、遮罩、关闭按钮三种关闭方式至少两种生效）。
-- [ ] 当前路由能命中并展示对应 PRD。
-- [ ] 路由未命中时展示明确错误提示。
-- [ ] 面板不遮挡系统级弹窗优先级（z-index 合理）。
-
-
-
-
-========================================================================
-
-## references/templates/prd-writing-standard-template.md
-
-# PRD 编写规范
-
-## 1. PRD 类型
-
-本项目区分两类 PRD：
-
-1. 系统级 PRD：描述完整系统或完整模块，可使用 create-prd 的 14 章结构。
-2. 页面级 PRD：描述单个页面、路由、弹窗、抽屉或局部交互，不强行套 14 章结构。
-
-## 2. 页面级 PRD 必须包含
-
-- 页面基础信息
-- 页面目标
-- 页面结构
-- 字段说明
-- 操作说明
-- 交互规则
-- 状态流转
-- 异常场景
-- 权限规则
-- 数据规则
-- 验收标准
-- 变更记录
-
-## 3. 信息不足处理
-
-不能确认的内容统一写为：
-
-```text
-[TODO: 需要确认具体内容]
-```
-
-不要编造业务规则。
-
-## 4. 页面代码与 PRD 同步
-
-页面代码发生功能、字段、按钮、交互、状态、权限、数据逻辑、异常处理、路由入口变化时，必须同步更新页面 PRD。
-
-
-
-
-========================================================================
-
-## references/templates/project-agents-template.md
-
-# AGENTS.md
-
-## 项目定位
-
-本项目是一个“AI 原型设计 + PRD 同步维护”的产品原型项目。Agent 不只是前端实现助手，还必须维护页面 PRD、功能清单、变更记录和一致性审计。
-
-## PRD Skill
-
-本项目使用 create-prd Skill：
-
-```text
-.agents/skills/create-prd/
-```
-
-当任务涉及 PRD 初始化、页面 PRD、Axure HTML 反向生成、页面变更同步 PRD、代码与 PRD 一致性审计时，必须优先参考该 Skill。
-
-当用户明确要求“编写 PRD”时，默认直接输出结构化 PRD 草案，不要先输出问卷式澄清问题；信息缺口统一用 `[TODO: ...]` 标注并在文末汇总“待确认项”。
-
-## PRD 输出目录
-
-所有真实项目 PRD 产物必须输出到：
-
-```text
-{PRD_ROOT}/
-```
-
-目录说明：
-
-```text
-{PRD_ROOT}/00-项目上下文.md
-{PRD_ROOT}/01-页面路由清单.md
-{PRD_ROOT}/02-功能清单.md
-{PRD_ROOT}/03-全局交互规则.md
-{PRD_ROOT}/04-PRD编写规范.md
-{PRD_ROOT}/system-prd/
-{PRD_ROOT}/pages/
-{PRD_ROOT}/changelog/
-{PRD_ROOT}/audit/
-{PRD_ROOT}/imports/
-{PRD_ROOT}/templates/
-{PRD_ROOT}/.index/traceability.json
-```
-
-## 页面 PRD 命名规则
-
-路由 `/management/dispatch/center` 对应：
-
-```text
-{PRD_ROOT}/pages/management-dispatch-center.md
-{PRD_ROOT}/changelog/management-dispatch-center-change.md
-```
-
-## 每次修改页面后的强制规则
-
-每次修改页面代码后，必须判断是否影响 PRD。
-
-必须同步 PRD 的情况：新增/删除功能、修改字段、按钮、筛选条件、页面结构、交互流程、状态流转、权限规则、数据展示逻辑、异常处理、入口、跳转、mock 数据结构、业务规则。
-
-纯视觉样式优化可以不更新 PRD 主体，但必须更新页面变更记录。
-
-每次页面变更后，至少执行一次：
-
-```bash
-python scripts/prdctl.py diff-sync . --staged --prd-root {PRD_ROOT}
-python scripts/prdctl.py sync . --from-code --prd-root {PRD_ROOT}
-python scripts/prdctl.py audit . --level strict --prd-root {PRD_ROOT}
-```
-
-## 新增页面规则
-
-新增页面时必须同步新增或更新：
-
-1. 页面代码
-2. 页面路由
-3. 页面 PRD
-4. 页面变更记录
-5. 页面路由清单
-6. 功能清单
-
-## 页面内 PRD 查看器（可选但推荐）
-
-如果项目是前端原型并且需要“页面内直接查看 PRD”，默认采用以下交互：
-
-1. 页面右下角固定 `PRD` 按钮。
-2. 点击按钮打开/关闭 PRD 遮罩面板。
-3. 遮罩点击可关闭，并保留明确关闭按钮。
-4. 使用路由映射表读取当前页面对应 PRD；未命中时提示：`未找到该页面对应的 PRD 文件`。
-5. PRD 内容按 Markdown 结构化渲染，不允许纯文本堆叠。
-
-## 完成输出格式
-
-每次任务完成后必须输出：
-
-### 1. 页面修改摘要
-
-### 2. PRD 影响判断
-
-| 页面 | 是否影响 PRD | 原因 |
-|---|---|---|
-
-### 3. 已修改文件
-
-| 文件类型 | 文件路径 | 修改说明 |
-|---|---|---|
-
-### 4. 一致性检查
-
-| 检查项 | 结果 | 说明 |
-|---|---|---|
-| 页面代码是否已修改 |  |  |
-| 页面 PRD 是否已同步 |  |  |
-| 功能清单是否已同步 |  |  |
-| 变更记录是否已同步 |  |  |
-| 路由清单是否已同步 |  |  |
-
-### 5. 运行检查结果
-
-说明是否执行了构建、lint、类型检查或页面预览。如果未执行，需要说明原因。
-
-## 优先级规则
-
-当用户最新描述、现有 PRD、现有代码三者冲突时，优先级为：
-
-1. 用户最新明确描述
-2. 页面 PRD
-3. 当前代码实现
-
-如果根据用户最新描述修改了代码，必须同步修正 PRD。
-
-
-
-
-========================================================================
-
-## references/templates/route-inventory-template.md
-
-# 页面路由清单
-
-| page_id | 所属模块 | 页面名称 | route | code_path | prd_path | 当前状态 |
-|---|---|---|---|---|---|---|
-| [TODO: page-xxx] | [TODO] | [TODO] | [TODO] | [TODO] | [TODO] | 待确认 |
-
-
-
-
-========================================================================
-
-## references/prompts/mode-audit.md
-
-# 模式：consistency-audit
-
-请检查当前页面代码/HTML 与 docs/product 中的 PRD 是否一致。
-
-输出：
-1. 审计结论。
-2. 页面中有但 PRD 没有的内容。
-3. PRD 中有但页面没有的内容。
-4. 功能清单缺口。
-5. 建议修复任务。
-
-
-
-
-========================================================================
-
-## references/prompts/mode-axure-html-import.md
-
-# 模式：axure-html-import
-
-请根据 Axure 导出的 HTML 目录逐页生成页面级 PRD。
-
-要求：
-1. 递归读取 HTML 页面。
-2. 提取页面标题、路径、文本、按钮、表单、表格、导航。
-3. 生成页面清单。
-4. 为每个页面生成页面 PRD 草稿。
-5. 复杂交互和业务规则无法确认时标注 [TODO]。
-
-
-
-
-========================================================================
-
-## references/prompts/mode-existing-code-init.md
-
-# 模式：existing-code-init
-
-请初始化当前已有 code 项目的 PRD 体系。
-
-要求：
-1. 扫描 src/router、src/pages、src/views、src/components。
-2. 创建 docs/product 目录体系。
-3. 生成页面路由清单、功能清单、PRD 编写规范。
-4. 为已有主要页面生成初版页面 PRD。
-5. 信息不足处标注 [TODO]。
-
-
-
-
-========================================================================
-
-## references/prompts/mode-greenfield-page-sync.md
-
-# 模式：greenfield-page-sync
-
-请在当前 code 原型项目中新增/修改页面，并同步维护页面 PRD。
-
-要求：
-1. 阅读 AGENTS.md 和 create-prd Skill。
-2. 修改页面代码。
-3. 判断本次修改是否影响 PRD。
-4. 同步更新 docs/product/pages/{route-slug}.md。
-5. 同步更新 docs/product/02-功能清单.md。
-6. 同步更新 docs/product/changelog/{route-slug}-change.md。
-7. 输出代码与 PRD 一致性检查。
-
-
-
-
-========================================================================
-
-## references/prompts/mode-system-prd.md
-
-# 模式：system-prd
-
-请基于业务上下文生成完整 14 章 B 端 PRD。
-
-要求：
-1. 先判断产品定型。
-2. 按 14 章结构生成。
-3. 第 10 章必须包含架构、流程、ER、状态机、功能清单和模块详解。
-4. 信息不足处标注 [TODO]。
 
 

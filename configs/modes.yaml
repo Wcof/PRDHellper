@@ -24,6 +24,35 @@ modes:
   consistency-audit:
     description: 检查页面代码/HTML 与 PRD 是否一致。
     output: docs/product/audit/{date}-consistency-audit.md
+  sync:
+    description: 增量同步页面代码、PRD、功能清单、变更记录之间的可追踪关系。
+    output:
+      - docs/product/.index/traceability.json
+      - docs/product/01-页面路由清单.md
+      - docs/product/02-功能清单.md
+      - docs/product/changelog/*.md
+traceability_fields:
+  page_prd_frontmatter:
+    - page_id
+    - route
+    - code_paths
+    - feature_ids
+    - change_ids
+    - last_synced_at
+  route_inventory:
+    - page_id
+    - route
+    - code_path
+    - prd_path
+  feature_list:
+    - feature_id
+    - owner_page_id
+    - status
+  page_changelog:
+    - change_id
+    - affected_page_ids
+    - affected_feature_ids
+    - source_commit
 page_prd_required_sections:
   - 页面基础信息
   - 页面目标

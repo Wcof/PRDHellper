@@ -1,0 +1,12 @@
+policy:
+  main_template_source: main-template/create-prd-skill-main
+  mode: "main-source-first"
+  notes:
+    - "主模板与主规范统一以内置 main-template/create-prd-skill-main 为准。"
+    - "PRDHellper 在主模板基础上承载工程化能力与扩展入口。"
+
+extension_entry:
+  local_extension_dir: references/templates/extensions
+  apply_rule:
+    - "先遵循主模板结构，再在扩展目录追加可选段落/片段。"
+    - "扩展内容不得破坏主模板核心章节与字段。"

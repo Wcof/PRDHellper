@@ -14,31 +14,29 @@
 
 当任务涉及 PRD 初始化、页面 PRD、Axure HTML 反向生成、页面变更同步 PRD、代码与 PRD 一致性审计时，必须优先参考该 Skill。
 
-当用户明确要求“编写 PRD”时，默认直接输出结构化 PRD 草案，不要先输出问卷式澄清问题；信息缺口统一用 `[TODO: ...]` 标注并在文末汇总“待确认项”。
-
 ## PRD 输出目录
 
 所有真实项目 PRD 产物必须输出到：
 
 ```text
-{PRD_ROOT}/
+docs/produc/
 ```
 
 目录说明：
 
 ```text
-{PRD_ROOT}/00-项目上下文.md
-{PRD_ROOT}/01-页面路由清单.md
-{PRD_ROOT}/02-功能清单.md
-{PRD_ROOT}/03-全局交互规则.md
-{PRD_ROOT}/04-PRD编写规范.md
-{PRD_ROOT}/system-prd/
-{PRD_ROOT}/pages/
-{PRD_ROOT}/changelog/
-{PRD_ROOT}/audit/
-{PRD_ROOT}/imports/
-{PRD_ROOT}/templates/
-{PRD_ROOT}/.index/traceability.json
+docs/produc/00-项目上下文.md
+docs/produc/01-页面路由清单.md
+docs/produc/02-功能清单.md
+docs/produc/03-全局交互规则.md
+docs/produc/04-PRD编写规范.md
+docs/produc/system-prd/
+docs/produc/pages/
+docs/produc/changelog/
+docs/produc/audit/
+docs/produc/imports/
+docs/produc/templates/
+docs/produc/.index/traceability.json
 ```
 
 ## 页面 PRD 命名规则
@@ -46,8 +44,8 @@
 路由 `/management/dispatch/center` 对应：
 
 ```text
-{PRD_ROOT}/pages/management-dispatch-center.md
-{PRD_ROOT}/changelog/management-dispatch-center-change.md
+docs/produc/pages/management-dispatch-center.md
+docs/produc/changelog/management-dispatch-center-change.md
 ```
 
 ## 每次修改页面后的强制规则
@@ -61,9 +59,9 @@
 每次页面变更后，至少执行一次：
 
 ```bash
-python scripts/prdctl.py diff-sync . --staged --prd-root {PRD_ROOT}
-python scripts/prdctl.py sync . --from-code --prd-root {PRD_ROOT}
-python scripts/prdctl.py audit . --level strict --prd-root {PRD_ROOT}
+python scripts/prdctl.py diff-sync . --staged --prd-root docs/produc
+python scripts/prdctl.py sync . --from-code --prd-root docs/produc
+python scripts/prdctl.py audit . --level strict --prd-root docs/produc
 ```
 
 ## 新增页面规则

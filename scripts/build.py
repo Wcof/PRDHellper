@@ -8,9 +8,28 @@ import re
 SKILL_DIR = Path(__file__).resolve().parent.parent
 DIST_DIR = SKILL_DIR / "dist"
 REFS_DIR = SKILL_DIR / "references"
+POLICY_FILE = SKILL_DIR / "configs" / "template-policy.yaml"
 
-ORDERED_FILES = [
-    SKILL_DIR / "SKILL.md",
+BASE_ORDERED_REL = [
+    Path("SKILL.md"),
+    Path("references/appendices/create-prd-appendix-typing.md"),
+    Path("references/chapters/create-prd-ch01-background.md"),
+    Path("references/chapters/create-prd-ch02-basic.md"),
+    Path("references/chapters/create-prd-ch03-commercial.md"),
+    Path("references/chapters/create-prd-ch04-goals.md"),
+    Path("references/chapters/create-prd-ch05-overview.md"),
+    Path("references/chapters/create-prd-ch06-scope.md"),
+    Path("references/chapters/create-prd-ch07-risks.md"),
+    Path("references/chapters/create-prd-ch08-09-terms.md"),
+    Path("references/chapters/create-prd-ch10-functions.md"),
+    Path("references/chapters/create-prd-ch11-tracking.md"),
+    Path("references/chapters/create-prd-ch12-permissions.md"),
+    Path("references/chapters/create-prd-ch13-operations.md"),
+    Path("references/chapters/create-prd-ch14-tbd.md"),
+    Path("references/appendices/create-prd-appendix-selfcheck.md"),
+]
+
+LOCAL_ORDERED = [
     REFS_DIR / "appendices" / "create-prd-appendix-engineering.md",
     REFS_DIR / "appendices" / "create-prd-appendix-mode-router.md",
     REFS_DIR / "appendices" / "create-prd-appendix-greenfield.md",
@@ -18,21 +37,6 @@ ORDERED_FILES = [
     REFS_DIR / "appendices" / "create-prd-appendix-axure-html.md",
     REFS_DIR / "appendices" / "create-prd-appendix-sync-audit.md",
     REFS_DIR / "appendices" / "create-prd-appendix-mcp-integration.md",
-    REFS_DIR / "appendices" / "create-prd-appendix-typing.md",
-    REFS_DIR / "chapters" / "create-prd-ch01-background.md",
-    REFS_DIR / "chapters" / "create-prd-ch02-basic.md",
-    REFS_DIR / "chapters" / "create-prd-ch03-commercial.md",
-    REFS_DIR / "chapters" / "create-prd-ch04-goals.md",
-    REFS_DIR / "chapters" / "create-prd-ch05-overview.md",
-    REFS_DIR / "chapters" / "create-prd-ch06-scope.md",
-    REFS_DIR / "chapters" / "create-prd-ch07-risks.md",
-    REFS_DIR / "chapters" / "create-prd-ch08-09-terms.md",
-    REFS_DIR / "chapters" / "create-prd-ch10-functions.md",
-    REFS_DIR / "chapters" / "create-prd-ch11-tracking.md",
-    REFS_DIR / "chapters" / "create-prd-ch12-permissions.md",
-    REFS_DIR / "chapters" / "create-prd-ch13-operations.md",
-    REFS_DIR / "chapters" / "create-prd-ch14-tbd.md",
-    REFS_DIR / "appendices" / "create-prd-appendix-selfcheck.md",
 ]
 
 TEMPLATE_DIR = REFS_DIR / "templates"
@@ -47,6 +51,30 @@ def normalize_skill(content: str) -> str:
     return content
 
 
+def policy_main_source() -> Path:
+    default_source = SKILL_DIR / "main-template" / "create-prd-skill-main"
+    if not POLICY_FILE.exists():
+        return default_source
+    text = POLICY_FILE.read_text(encoding="utf-8", errors="ignore")
+    m = re.search(r"^\s*main_template_source:\s*(.+?)\s*$", text, flags=re.M)
+    if not m:
+        return default_source
+    raw = m.group(1).strip().strip("'").strip('"')
+    p = (SKILL_DIR / raw).resolve()
+    return p if p.exists() else default_source
+
+
+def ordered_files() -> list[Path]:
+    main_root = policy_main_source()
+    files: list[Path] = []
+    for rel in BASE_ORDERED_REL:
+        base_file = main_root / rel
+        local_fallback = SKILL_DIR / rel
+        files.append(base_file if base_file.exists() else local_fallback)
+    files.extend(LOCAL_ORDERED)
+    return files
+
+
 def build() -> None:
     DIST_DIR.mkdir(exist_ok=True)
     parts = [
@@ -55,7 +83,7 @@ def build() -> None:
         "> 包含完整 14 章系统 PRD、页面级 PRD、项目初始化、Axure HTML 反向生成、代码与 PRD 同步审计规则。\n",
         "---\n",
     ]
-    for fpath in ORDERED_FILES:
+    for fpath in ordered_files():
         if not fpath.exists():
             print(f"WARNING 缺失: {fpath.relative_to(SKILL_DIR)}")
             continue
