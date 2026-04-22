@@ -119,3 +119,26 @@ def test_existing_code_mode_emits_backfill_wakeup_prompt(tmp_path: Path):
     text = wakeup.read_text(encoding="utf-8")
     assert "已有页面补全 PRD" in text
     assert "scan-code" in text
+    assert "check_consistency.sh" in text
+
+
+def test_install_copies_harness_entry(tmp_path: Path):
+    result = run_install(
+        "--scope",
+        "current",
+        "--project-root",
+        str(tmp_path),
+        "--prd-root",
+        "docs/prd",
+        "--init-project",
+        "--yes",
+        "--on-existing",
+        "reinstall",
+    )
+    assert result.returncode == 0, result.stderr
+    wrapper = tmp_path / ".agents/skills/create-prd/scripts/check_consistency.sh"
+    harness = tmp_path / ".agents/skills/create-prd/scripts/harness/check_consistency.sh"
+    readme = tmp_path / ".agents/skills/create-prd/scripts/harness/README.md"
+    assert wrapper.exists()
+    assert harness.exists()
+    assert readme.exists()

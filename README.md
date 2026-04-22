@@ -1,5 +1,7 @@
 # create-prd — 工程化 PRD Skill
 
+![create-prd 宣传图](docs/assets/create-prd-promo.svg)
+
 > 面向产品经理的 PRD 工程化助手：支持完整系统级 PRD、code 网页原型页面 PRD 同步、已有代码项目 PRD 初始化、Axure HTML 反向生成 PRD、代码与 PRD 一致性审计。
 
 这个项目不再只是“把业务描述生成一份 PRD”的 Prompt，而是一个可以放进 Codex / Claude Code / 其他 Agent 工作流中的 **PRD Skill 工程包**。
@@ -19,6 +21,26 @@ Template 层：references/templates 提供页面 PRD、功能清单、AGENTS.md 
 Script 层：scripts/prdctl.py 提供初始化、扫描、审计命令
 Project Docs 层：业务项目 docs/product 存放真实 PRD 产物
 ```
+
+补充：项目级一致性门禁统一走：
+
+```text
+scripts/check_consistency.sh
+```
+
+该脚本当前会转发到：
+
+```text
+scripts/harness/check_consistency.sh
+```
+
+这样既保留现有调用方式，也为后续扩展更多 harness 检查器预留入口。
+
+当前默认行为：
+
+1. `scripts/check_consistency.sh` 是稳定入口，适合直接给 Agent 调用
+2. `scripts/harness/check_consistency.sh` 负责真实逻辑，可继续扩展
+3. 入口会优先识别代码变更并执行同步，再进行 `diff-sync + audit`
 
 ## 主模板策略（重要）
 
@@ -315,6 +337,10 @@ references/
   prompts/           # 各模式可复制任务模板
 scripts/
   prdctl.py          # 统一 CLI
+  check_consistency.sh
+  harness/
+    check_consistency.sh
+    README.md
   build.py           # 构建 dist prompt
   install_skill.py   # 安装入口
 examples/            # Codex 任务示例

@@ -61,10 +61,13 @@
 每次页面变更后，至少执行一次：
 
 ```bash
-python scripts/prdctl.py diff-sync . --staged --prd-root {PRD_ROOT}
-python scripts/prdctl.py sync . --from-code --prd-root {PRD_ROOT}
-python scripts/prdctl.py audit . --level strict --prd-root {PRD_ROOT}
+bash scripts/check_consistency.sh . --mode=strict
 ```
+
+说明：
+- `scripts/check_consistency.sh` 是项目级统一检查入口。
+- 当前入口会转发到 `scripts/harness/check_consistency.sh`，后续扩展更多约束时仍保持该入口不变。
+- 该入口默认会按变更类型自动选择 `sync --from-code` 或 `sync --from-prd`，然后再执行一致性检查。
 
 ## 新增页面规则
 
