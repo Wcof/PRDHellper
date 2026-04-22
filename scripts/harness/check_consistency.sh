@@ -1,11 +1,68 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_ROOT="${1:-.}"
+PROJECT_ROOT="."
 MODE="${CHECK_MODE:-warn}"
-if [[ "${2:-}" == "--mode=strict" ]]; then
-  MODE="strict"
-fi
+POSITIONAL_SET=0
+
+usage() {
+  cat <<'EOF'
+Usage: check_consistency.sh [project_root] [--mode strict|warn]
+
+Environment:
+  PYTHON_BIN          Python executable to run prdctl.py (default: python3)
+  PRD_ROOT            Override detected PRD root
+  CHECK_MODE          Default check mode when --mode is omitted
+  HARNESS_SYNC_MODE   auto|code|prd|off
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode=strict)
+      MODE="strict"
+      shift
+      ;;
+    --mode=warn)
+      MODE="warn"
+      shift
+      ;;
+    --mode)
+      if [[ $# -lt 2 ]]; then
+        echo "[harness:check-consistency] missing value for --mode" >&2
+        exit 2
+      fi
+      MODE="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      echo "[harness:check-consistency] unknown option: $1" >&2
+      exit 2
+      ;;
+    *)
+      if [[ "${POSITIONAL_SET}" -eq 1 ]]; then
+        echo "[harness:check-consistency] unexpected extra positional argument: $1" >&2
+        exit 2
+      fi
+      PROJECT_ROOT="$1"
+      POSITIONAL_SET=1
+      shift
+      ;;
+  esac
+done
+
+case "${MODE}" in
+  warn|strict)
+    ;;
+  *)
+    echo "[harness:check-consistency] invalid mode=${MODE}" >&2
+    exit 2
+    ;;
+esac
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 HARNESS_SYNC_MODE="${HARNESS_SYNC_MODE:-auto}"
@@ -33,7 +90,33 @@ collect_changed_files() {
   if ! git -C "${PROJECT_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     return 0
   fi
-  git -C "${PROJECT_ROOT}" status --porcelain | awk '{print $2}'
+  git -C "${PROJECT_ROOT}" status --porcelain=v1 --untracked-files=all \
+    | sed -E 's/^...//' \
+    | sed -E 's#.* -> ##'
+}
+
+is_code_related_path() {
+  local path="$1"
+
+  if [[ -z "${path}" ]]; then
+    return 1
+  fi
+
+  case "${path}" in
+    "${PRD_ROOT}"/*|docs/*|*.md)
+      return 1
+      ;;
+  esac
+
+  if echo "${path}" | grep -Eq '^(src|app|pages|views|router|routes|components|layouts|features|modules|store|stores|service|services|api|mock|mocks|lib|utils|hooks|composables|constants|types|schemas|models)/'; then
+    return 0
+  fi
+
+  if echo "${path}" | grep -Eq '\.(js|jsx|ts|tsx|vue|svelte|css|scss|sass|less|styl|json)$'; then
+    return 0
+  fi
+
+  return 1
 }
 
 infer_sync_mode() {
@@ -58,10 +141,12 @@ infer_sync_mode() {
     return 0
   fi
 
-  if echo "${changed}" | grep -Eq "^(src/|app/|pages/|router/|routes/)"; then
-    echo "code"
-    return 0
-  fi
+  while IFS= read -r path; do
+    if is_code_related_path "${path}"; then
+      echo "code"
+      return 0
+    fi
+  done <<< "${changed}"
 
   if echo "${changed}" | grep -Eq "^${PRD_ROOT}/(pages|changelog|01-|02-|03-|04-|system-prd|imports|audit|templates)"; then
     echo "prd"

@@ -331,3 +331,48 @@ def test_check_consistency_harness_detects_docs_produc(tmp_path: Path):
     )
     assert result.returncode == 0, result.stderr
     assert "prd_root=docs/produc" in result.stdout
+
+
+def test_check_consistency_harness_accepts_split_mode_flag(tmp_path: Path):
+    docs = tmp_path / "docs" / "product"
+    (docs / "pages").mkdir(parents=True)
+    (docs / "changelog").mkdir(parents=True)
+    (docs / "audit").mkdir(parents=True)
+    (docs / ".index").mkdir(parents=True)
+    (docs / "01-页面路由清单.md").write_text("# 页面路由清单\n\n", encoding="utf-8")
+    (docs / "02-功能清单.md").write_text("# 功能清单\n\n", encoding="utf-8")
+
+    script = ROOT / "scripts" / "check_consistency.sh"
+    result = subprocess.run(
+        ["bash", str(script), str(tmp_path), "--mode", "strict"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "mode=strict" in result.stdout
+
+
+def test_diff_sync_treats_component_changes_as_code_changes(tmp_path: Path):
+    subprocess.run(["git", "init"], cwd=str(tmp_path), check=True, capture_output=True, text=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=str(tmp_path), check=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=str(tmp_path), check=True)
+
+    init = run_cli("init-project", str(tmp_path), "--mode", "greenfield")
+    assert init.returncode == 0, init.stderr
+    subprocess.run(["git", "add", "."], cwd=str(tmp_path), check=True)
+    subprocess.run(["git", "commit", "-m", "init"], cwd=str(tmp_path), check=True, capture_output=True, text=True)
+
+    component = tmp_path / "components" / "FilterPanel.tsx"
+    component.parent.mkdir(parents=True, exist_ok=True)
+    component.write_text("export const FilterPanel = () => null;\n", encoding="utf-8")
+    subprocess.run(["git", "add", str(component.relative_to(tmp_path))], cwd=str(tmp_path), check=True)
+
+    result = run_cli("diff-sync", str(tmp_path), "--staged")
+    assert result.returncode == 0, result.stderr
+
+    report = tmp_path / f"docs/product/audit/{dt.date.today().isoformat()}-diff-sync.md"
+    assert report.exists()
+    text = report.read_text(encoding="utf-8")
+    assert "需执行 `prdctl sync --from-code`" in text
