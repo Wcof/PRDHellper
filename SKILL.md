@@ -1,6 +1,6 @@
 ---
 name: create-prd
-description: 用于产品经理在 AI 原型项目中创建、初始化、同步和审计 PRD。适用于：从零到一 code 网页原型项目、已有代码项目、Axure HTML 反向生成 PRD、页面变更后同步页面 PRD、完整系统级 14 章 B 端 PRD 生成。
+description: 用于产品经理在 AI 原型项目中创建、初始化、同步和审计 PRD。适用于：从零到一 code 网页原型项目、已有代码项目、Axure HTML 反向生成 PRD、页面变更后同步页面 PRD、系统级 PRD 生成。
 ---
 
 # create-prd
@@ -54,7 +54,7 @@ references/templates/extensions/
 
 | 模式 | 触发场景 | 最小可用结果 |
 |---|---|---|
-| `system-prd` | 用户要求生成完整 PRD / 产品方案 / 需求文档 | 完成产品定型判断与章节骨架 |
+| `system` | 用户要求生成完整 PRD / 产品方案 / 需求文档 | 完成产品定型判断与系统级 PRD 骨架 |
 | `greenfield-page-sync` | 新建页面、修改页面后同步页面 PRD | 给出页面 PRD 影响判断与需同步清单 |
 | `existing-code-init` | 已有代码项目初始化 PRD 体系 | 建立路由/页面/功能的初始化链路 |
 | `axure-html-import` | Axure HTML 反向生成 PRD | 形成页面识别清单与待确认项 |
@@ -62,7 +62,7 @@ references/templates/extensions/
 
 当用户没有明确指定模式时，按以下顺序判断：
 
-1. 用户说“完整 PRD / 产品方案 / 需求文档” -> `system-prd`
+1. 用户说“完整 PRD / 产品方案 / 需求文档” -> `system`
 2. 用户说“初始化当前项目 / 给已有代码项目补 PRD / 扫描路由生成 PRD” -> `existing-code-init`
 3. 用户说“新建页面后同步 PRD / 页面修改后更新 PRD” -> `greenfield-page-sync`
 4. 用户说“Axure / HTML 导出 / 根据页面路径反向生成 PRD” -> `axure-html-import`
@@ -150,30 +150,18 @@ references/templates/extensions/
 - Axure 导入规则
 - 无关页面模板
 
-### `system-prd`
+### `system`
 
 先只读取：
 
 1. `references/appendices/create-prd-appendix-typing.md`
 
-完成产品定型与章节骨架后，才允许按顺序逐个读取：
+完成产品定型与系统级 PRD 骨架后，才允许按需逐个读取：
 
-1. `references/chapters/create-prd-ch01-background.md`
-2. `references/chapters/create-prd-ch02-basic.md`
-3. `references/chapters/create-prd-ch03-commercial.md`
-4. `references/chapters/create-prd-ch04-goals.md`
-5. `references/chapters/create-prd-ch05-overview.md`
-6. `references/chapters/create-prd-ch06-scope.md`
-7. `references/chapters/create-prd-ch07-risks.md`
-8. `references/chapters/create-prd-ch08-09-terms.md`
-9. `references/chapters/create-prd-ch10-functions.md`
-10. `references/chapters/create-prd-ch11-tracking.md`
-11. `references/chapters/create-prd-ch12-permissions.md`
-12. `references/chapters/create-prd-ch13-operations.md`
-13. `references/chapters/create-prd-ch14-tbd.md`
-14. `references/appendices/create-prd-appendix-selfcheck.md`
+1. `references/chapters/` 下与当前系统级 PRD 任务相关的章节文件
+2. `references/appendices/create-prd-appendix-selfcheck.md`
 
-禁止一开始就全量读取整个章节集。
+禁止一开始就全量读取整个章节集或预设固定章节总数。
 
 ## 产出契约
 
@@ -234,7 +222,7 @@ references/templates/extensions/
 - 需补充的 PRD 片段
 - 修复优先级建议
 
-### `system-prd`
+### `system`
 
 必须先完成：
 
@@ -243,6 +231,13 @@ references/templates/extensions/
 3. PRD 骨架
 
 如任务继续需要，再逐章展开完整内容。
+
+最终交付时必须满足以下落盘规则：
+
+1. 系统级内容写入 `docs/prd/system/`，不能只停留在单个根目录总文档。
+2. 只要系统级 PRD 中已经明确出现页面、路由、弹窗、抽屉、模式页、独立工作台，就必须同步拆出对应页面级 PRD 到 `docs/prd/pages/`。
+3. 如果只生成了一个类似 `docs/prd/<项目名>-PRD.md` 的总文档，而 `docs/prd/system/` 和 `docs/prd/pages/` 为空，则该交付视为未完成拆分。
+4. 页面信息还不完整时，也要先在 `docs/prd/pages/` 下生成占位草稿，并用 `[TODO: ...]` 标出待确认项。
 
 ## 执行边界
 
@@ -259,14 +254,14 @@ references/templates/extensions/
 1. 聊天场景可直接输出 Markdown。
 2. 代码仓库场景应直接修改约定的 PRD 产物目录，不能只停留在回复里。
 3. 信息不足时使用 `[TODO: 需要补充什么]`，不要编造。
-4. 页面级 PRD 不套完整 14 章，重点写页面定位、结构、字段、操作、交互、状态、异常、权限、数据规则、验收标准。
+4. 页面级 PRD 不套系统级长文档结构，重点写页面定位、结构、字段、操作、交互、状态、异常、权限、数据规则、验收标准。
 5. 完成后输出：修改摘要、PRD 影响判断、已修改文件、一致性检查、运行/脚本检查结果。
 
 ## 页面内 PRD 查看器
 
 只有当用户明确要求“页面内直接查看当前页面 PRD”时，才读取或实现以下能力：
 
-1. 右下角固定 `PRD` 按钮
+1. 页面顶部工具区固定 `PRD` 按钮
 2. 遮罩式 PRD 面板
 3. 明确关闭入口
 4. 路由映射表读取 PRD

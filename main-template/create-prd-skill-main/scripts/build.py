@@ -36,6 +36,18 @@ ORDERED_FILES = [
 ]
 
 
+def section_label(fpath: Path, content: str) -> str:
+    for line in content.splitlines():
+        if line.startswith("# "):
+            return line[2:].strip()
+    rel = fpath.relative_to(SKILL_DIR).as_posix()
+    rel = re.sub(r"(^|/)create-prd-ch\d+(?:-\d+)?-", r"\1", rel)
+    rel = rel.replace("create-prd-", "")
+    rel = rel.replace(".md", "")
+    rel = rel.replace("/", " / ")
+    return rel
+
+
 def build_universal_prompt():
     """将所有参考文件拼接为独立可用的 universal prompt。"""
     DIST_DIR.mkdir(exist_ok=True)
@@ -66,7 +78,7 @@ def build_universal_prompt():
             )
 
         parts.append(f"\n{'='*60}\n")
-        parts.append(f"## {fpath.stem}\n")
+        parts.append(f"## {section_label(fpath, content)}\n")
         parts.append(content)
         parts.append("\n")
 

@@ -1,8 +1,8 @@
 # 附录：模式选择器
 
-## system-prd
+## system
 
-用户要求完整 PRD、产品方案、需求文档时使用。输出完整 14 章结构。
+用户要求完整 PRD、产品方案、需求文档时使用。先输出系统级 PRD 骨架，再按需展开章节内容。
 
 ## greenfield-page-sync
 
@@ -10,7 +10,7 @@
 
 ## existing-code-init
 
-已有代码项目使用。先扫描路由和页面，建立 `docs/product` 目录、页面路由清单、功能清单和初版页面 PRD。
+已有代码项目使用。先扫描路由和页面，建立 `docs/prd` 目录、页面路由清单、功能清单和初版页面 PRD。
 
 ## axure-html-import
 

@@ -8,7 +8,7 @@
 
 1. 扫描 `src/router`、`src/pages`、`src/views`、`src/components`。
 2. 推断页面路由和页面文件关系。
-3. 创建 `docs/product` 文档体系。
+3. 创建 `docs/prd` 文档体系。
 4. 生成页面路由清单。
 5. 生成初版功能清单。
 6. 为主要页面生成页面级 PRD。

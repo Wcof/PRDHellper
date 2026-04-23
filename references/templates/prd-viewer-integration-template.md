@@ -1,43 +1,62 @@
 # 页面内 PRD 查看器接入模板
 
-> 目标：在页面右下角显示 `PRD` 按钮，点击后查看当前路由对应的页面 PRD。
+> 目标：在页面顶部工具区提供 `PRD` 入口，点击后用全屏遮罩查看当前路由对应的页面级 PRD。
 
-## 1) 目录建议
+## 1) PRD 来源
+
+真实 PRD 文件统一来自目标项目根目录：
 
 ```text
-src/prd_docs/
-├── route-map.ts
-├── management-dispatch-center.md
-└── ...
+docs/prd/pages/<route-slug>.md
 ```
 
-## 2) 路由映射表示例
+不要读取 `.agents/skills/create-prd/` 内的任何内容作为页面 PRD。
+
+## 2) 路由映射规范
+
+需要维护一个“当前路由 -> PRD slug”的映射表。最小结构如下：
 
 ```ts
-// src/prd_docs/route-map.ts
-export const PRD_ROUTE_MAP: Record<string, string> = {
-  "/management/dispatch/center": "management-dispatch-center.md",
+type PrdRouteMap = Record<string, string>;
+
+export const PRD_ROUTE_MAP: PrdRouteMap = {
+  "/management/dispatch/center": "management-dispatch-center",
 };
 ```
 
-## 3) 行为规范（必须）
+命中后读取：
 
-1. 右下角固定按钮文案：`PRD`。
-2. 点击打开 PRD 面板；再次点击关闭。
-3. 点击遮罩关闭；面板内必须有关闭按钮。
-4. 内容区滚动，遮罩不滚动。
-5. 路由未命中提示：`未找到该页面对应的 PRD 文件`。
+```text
+docs/prd/pages/<slug>.md
+```
 
-## 4) UI 建议
+未命中时提示：
 
-- 浮动按钮：`position: fixed; right: 24px; bottom: 24px; z-index: 560;`
-- 遮罩层：`z-index: 600;`
-- 面板容器：`max-width: 980px; max-height: 80vh; overflow: auto;`
+```text
+未找到该页面对应的 PRD 文件
+```
+
+## 3) 交互规范（必须）
+
+1. 页面顶部工具区固定显示 `PRD` 入口按钮。
+2. 点击按钮打开全屏遮罩面板，再次点击或点关闭按钮可关闭。
+3. 点击遮罩空白区可关闭。
+4. 遮罩内内容区域单独滚动，页面底层不滚动。
+5. 遮罩面板内必须按 Markdown 渲染 PRD 内容，不允许纯文本堆叠。
+
+## 4) UI 约定
+
+1. `PRD` 按钮放在页面顶部工具区，和页面标题、主操作区同层。
+2. 遮罩层覆盖整个视口。
+3. 面板主体居中显示，建议宽度 `min(1200px, 92vw)`。
+4. 面板内容区建议高度 `min(80vh, 900px)`，超出后内部滚动。
+5. 遮罩层 z-index 必须高于页面业务内容和常规弹层。
 
 ## 5) 最低验收
 
-- [ ] 任意页面右下角可看到 `PRD` 按钮。
-- [ ] 能打开并关闭 PRD 面板（按钮、遮罩、关闭按钮三种关闭方式至少两种生效）。
-- [ ] 当前路由能命中并展示对应 PRD。
-- [ ] 路由未命中时展示明确错误提示。
-- [ ] 面板不遮挡系统级弹窗优先级（z-index 合理）。
+- [ ] 任意接入页面的顶部工具区可看到 `PRD` 按钮。
+- [ ] 点击后可打开全屏遮罩。
+- [ ] 能根据当前路由正确映射到 `docs/prd/pages/<slug>.md`。
+- [ ] 路由未命中时展示 `未找到该页面对应的 PRD 文件`。
+- [ ] PRD 内容按 Markdown 结构化渲染。
+- [ ] 关闭方式至少支持：关闭按钮、遮罩点击。
