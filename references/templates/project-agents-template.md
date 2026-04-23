@@ -13,6 +13,7 @@
 ```
 
 当任务涉及 PRD 初始化、页面 PRD、Axure HTML 反向生成、页面变更同步 PRD、代码与 PRD 一致性审计时，必须优先参考该 Skill。
+项目根目录的 `AGENTS.md` 与 `CLAUDE.md` 只承担发现与路由作用；真正的本体仍然是 `.agents/skills/create-prd/SKILL.md`。
 
 当用户明确要求“编写 PRD”时，默认直接输出结构化 PRD 草案，不要先输出问卷式澄清问题；信息缺口统一用 `[TODO: ...]` 标注并在文末汇总“待确认项”。
 
@@ -32,7 +33,7 @@
 {PRD_ROOT}/02-功能清单.md
 {PRD_ROOT}/03-全局交互规则.md
 {PRD_ROOT}/04-PRD编写规范.md
-{PRD_ROOT}/system-prd/
+{PRD_ROOT}/system/
 {PRD_ROOT}/pages/
 {PRD_ROOT}/changelog/
 {PRD_ROOT}/audit/
@@ -40,6 +41,13 @@
 {PRD_ROOT}/templates/
 {PRD_ROOT}/.index/traceability.json
 ```
+
+补充规则：
+
+1. `system/` 存放系统级 PRD。
+2. `pages/` 存放页面级 PRD。
+3. 如果已经生成了完整系统 PRD，但 `system/` 和 `pages/` 仍然为空，则该交付不算完成。
+4. 根目录下单个总 PRD 文档只能作为汇总草稿，不能替代 `system/` 和 `pages/` 下的正式拆分产物。
 
 ## 页面 PRD 命名规则
 
@@ -80,11 +88,22 @@ bash scripts/check_consistency.sh . --mode=strict
 5. 页面路由清单
 6. 功能清单
 
+## 完整系统 PRD 的额外规则
+
+当任务是“编写完整 PRD / 系统级 PRD”时，除了系统级内容，还必须继续判断并拆分：
+
+1. 哪些内容属于 `system/`；
+2. 哪些内容已经可以明确到页面级；
+3. 哪些页面级内容需要写入 `pages/`；
+4. 哪些页面仍缺信息，需要先生成占位草稿。
+
+如果只生成一个总 PRD 文件，没有同步 `system/` 和 `pages/`，视为交付不完整。
+
 ## 页面内 PRD 查看器（可选但推荐）
 
 如果项目是前端原型并且需要“页面内直接查看 PRD”，默认采用以下交互：
 
-1. 页面右下角固定 `PRD` 按钮。
+1. 页面顶部工具区固定 `PRD` 按钮。
 2. 点击按钮打开/关闭 PRD 遮罩面板。
 3. 遮罩点击可关闭，并保留明确关闭按钮。
 4. 使用路由映射表读取当前页面对应 PRD；未命中时提示：`未找到该页面对应的 PRD 文件`。

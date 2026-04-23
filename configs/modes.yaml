@@ -1,36 +1,36 @@
 modes:
-  system-prd:
-    description: 生成完整 14 章系统级 B 端 PRD。
-    output: docs/product/system-prd/{project-name}-PRD.md
+  system:
+    description: 生成系统级 PRD。
+    output: docs/prd/system/{project-name}.md
   greenfield-page-sync:
     description: 从零到一新项目，页面创建/修改后同步页面 PRD。
     output:
-      - docs/product/pages/{route-slug}.md
-      - docs/product/changelog/{route-slug}-change.md
-      - docs/product/02-功能清单.md
+      - docs/prd/pages/{route-slug}.md
+      - docs/prd/changelog/{route-slug}-change.md
+      - docs/prd/02-功能清单.md
   existing-code-init:
     description: 已有 code 原型项目初始化 PRD 体系。
     output:
-      - docs/product/00-项目上下文.md
-      - docs/product/01-页面路由清单.md
-      - docs/product/02-功能清单.md
-      - docs/product/pages/*.md
+      - docs/prd/00-项目上下文.md
+      - docs/prd/01-页面路由清单.md
+      - docs/prd/02-功能清单.md
+      - docs/prd/pages/*.md
   axure-html-import:
     description: 读取 Axure 导出 HTML，逐页面反向生成 PRD。
     input: axure-html-root
     output:
-      - docs/product/imports/axure-pages.md
-      - docs/product/pages/*.md
+      - docs/prd/imports/axure-pages.md
+      - docs/prd/pages/*.md
   consistency-audit:
     description: 检查页面代码/HTML 与 PRD 是否一致。
-    output: docs/product/audit/{date}-consistency-audit.md
+    output: docs/prd/audit/{date}-consistency-audit.md
   sync:
     description: 增量同步页面代码、PRD、功能清单、变更记录之间的可追踪关系。
     output:
-      - docs/product/.index/traceability.json
-      - docs/product/01-页面路由清单.md
-      - docs/product/02-功能清单.md
-      - docs/product/changelog/*.md
+      - docs/prd/.index/traceability.json
+      - docs/prd/01-页面路由清单.md
+      - docs/prd/02-功能清单.md
+      - docs/prd/changelog/*.md
 traceability_fields:
   page_prd_frontmatter:
     - page_id

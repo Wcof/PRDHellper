@@ -281,11 +281,11 @@ def parse_backticked(value: str) -> str:
     return value.replace("`", "").strip()
 
 
-def ensure_prd_dirs(project_root: Path, prd_root: str = "docs/product") -> Path:
+def ensure_prd_dirs(project_root: Path, prd_root: str = "docs/prd") -> Path:
     docs = project_root / prd_root
     for d in [
         docs,
-        docs / "system-prd",
+        docs / "system",
         docs / "pages",
         docs / "changelog",
         docs / "audit",
@@ -297,7 +297,7 @@ def ensure_prd_dirs(project_root: Path, prd_root: str = "docs/product") -> Path:
     return docs
 
 
-def init_project(project_root: Path, mode: str, prd_root: str = "docs/product", force: bool = False) -> None:
+def init_project(project_root: Path, mode: str, prd_root: str = "docs/prd", force: bool = False) -> None:
     root = project_root.resolve()
     docs = ensure_prd_dirs(root, prd_root=prd_root)
 
@@ -436,7 +436,7 @@ def create_page_prd(
     route: str,
     page_name: str,
     page_file: str,
-    prd_root: str = "docs/product",
+    prd_root: str = "docs/prd",
     force: bool = False,
 ) -> Path:
     slug = route_to_slug(route)
@@ -682,7 +682,7 @@ def collect_changes(project_root: Path, prd_root: str) -> Dict[str, Dict[str, st
     return changes
 
 
-def build_traceability_index(project_root: Path, prd_root: str = "docs/product") -> Dict[str, Any]:
+def build_traceability_index(project_root: Path, prd_root: str = "docs/prd") -> Dict[str, Any]:
     pages = collect_page_docs(project_root, prd_root)
     routes = collect_routes(project_root, prd_root)
     features = collect_features(project_root, prd_root)
@@ -696,7 +696,7 @@ def build_traceability_index(project_root: Path, prd_root: str = "docs/product")
     }
 
 
-def write_traceability_index(project_root: Path, prd_root: str = "docs/product") -> Path:
+def write_traceability_index(project_root: Path, prd_root: str = "docs/prd") -> Path:
     index = build_traceability_index(project_root, prd_root=prd_root)
     out = project_root / prd_root / ".index" / "traceability.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -1185,28 +1185,28 @@ def main() -> None:
     p = sub.add_parser("init-project", help="初始化业务项目 PRD 体系")
     p.add_argument("project_root")
     p.add_argument("--mode", choices=["greenfield", "existing-code", "axure"], default="greenfield")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=lambda a: init_project(Path(a.project_root), a.mode, a.prd_root, a.force))
 
     p = sub.add_parser("scan-code", help="扫描代码项目路由/页面")
     p.add_argument("project_root")
-    p.add_argument("--out", default="docs/product/01-页面路由清单.md")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--out", default="docs/prd/01-页面路由清单.md")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--create-prd", action="store_true")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=cmd_scan_code)
 
     p = sub.add_parser("sync", help="同步 traceability 链路")
     p.add_argument("project_root")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--from-code", action="store_true")
     p.add_argument("--from-prd", action="store_true")
     p.set_defaults(func=cmd_sync)
 
     p = sub.add_parser("diff-sync", help="根据 git diff 输出一致性同步建议")
     p.add_argument("project_root")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--base", default="HEAD")
     p.add_argument("--staged", action="store_true")
     p.set_defaults(func=cmd_diff_sync)
@@ -1214,15 +1214,15 @@ def main() -> None:
     p = sub.add_parser("scan-axure", help="扫描 Axure 导出 HTML")
     p.add_argument("html_root")
     p.add_argument("--project-root", default=None)
-    p.add_argument("--prd-root", default="docs/product")
-    p.add_argument("--out", default="docs/product/imports/axure-pages.md")
+    p.add_argument("--prd-root", default="docs/prd")
+    p.add_argument("--out", default="docs/prd/imports/axure-pages.md")
     p.add_argument("--create-prd", action="store_true")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=cmd_scan_axure)
 
     p = sub.add_parser("audit", help="一致性审计")
     p.add_argument("project_root")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--level", choices=["basic", "strict"], default="basic")
     p.add_argument("--fail-on-high", action="store_true")
     p.set_defaults(func=cmd_audit)

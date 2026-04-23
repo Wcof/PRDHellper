@@ -70,12 +70,12 @@ HARNESS_SYNC_MODE="${HARNESS_SYNC_MODE:-auto}"
 detect_prd_root() {
   if [[ -d "${PROJECT_ROOT}/docs/produc" ]]; then
     echo "docs/produc"
-  elif [[ -d "${PROJECT_ROOT}/docs/product" ]]; then
-    echo "docs/product"
   elif [[ -d "${PROJECT_ROOT}/docs/prd" ]]; then
     echo "docs/prd"
-  else
+  elif [[ -d "${PROJECT_ROOT}/docs/product" ]]; then
     echo "docs/product"
+  else
+    echo "docs/prd"
   fi
 }
 
@@ -148,7 +148,7 @@ infer_sync_mode() {
     fi
   done <<< "${changed}"
 
-  if echo "${changed}" | grep -Eq "^${PRD_ROOT}/(pages|changelog|01-|02-|03-|04-|system-prd|imports|audit|templates)"; then
+  if echo "${changed}" | grep -Eq "^${PRD_ROOT}/(pages|changelog|01-|02-|03-|04-|system|system-prd|imports|audit|templates)"; then
     echo "prd"
     return 0
   fi

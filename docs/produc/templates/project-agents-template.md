@@ -30,7 +30,7 @@
 {PRD_ROOT}/02-功能清单.md
 {PRD_ROOT}/03-全局交互规则.md
 {PRD_ROOT}/04-PRD编写规范.md
-{PRD_ROOT}/system-prd/
+{PRD_ROOT}/system/
 {PRD_ROOT}/pages/
 {PRD_ROOT}/changelog/
 {PRD_ROOT}/audit/
@@ -79,7 +79,7 @@ python scripts/prdctl.py audit . --level strict --prd-root {PRD_ROOT}
 
 如果项目是前端原型并且需要“页面内直接查看 PRD”，默认采用以下交互：
 
-1. 页面右下角固定 `PRD` 按钮。
+1. 页面顶部工具区固定 `PRD` 按钮。
 2. 点击按钮打开/关闭 PRD 遮罩面板。
 3. 遮罩点击可关闭，并保留明确关闭按钮。
 4. 使用路由映射表读取当前页面对应 PRD；未命中时提示：`未找到该页面对应的 PRD 文件`。

@@ -51,6 +51,18 @@ def normalize_skill(content: str) -> str:
     return content
 
 
+def section_label(fpath: Path, content: str) -> str:
+    for line in content.splitlines():
+        if line.startswith("# "):
+            return line[2:].strip()
+    rel = fpath.relative_to(SKILL_DIR).as_posix()
+    rel = re.sub(r"(^|/)create-prd-ch\d+(?:-\d+)?-", r"\1", rel)
+    rel = rel.replace("create-prd-", "")
+    rel = rel.replace(".md", "")
+    rel = rel.replace("/", " / ")
+    return rel
+
+
 def policy_main_source() -> Path:
     default_source = SKILL_DIR / "main-template" / "create-prd-skill-main"
     if not POLICY_FILE.exists():
@@ -80,7 +92,7 @@ def build() -> None:
     parts = [
         "# Create-PRD 工程化完整独立 Prompt\n",
         "> 本文件可在任意 LLM 中直接使用，也可作为 Codex/Claude Code Skill 的参考文本。\n",
-        "> 包含完整 14 章系统 PRD、页面级 PRD、项目初始化、Axure HTML 反向生成、代码与 PRD 同步审计规则。\n",
+        "> 包含系统级 PRD、页面级 PRD、项目初始化、Axure HTML 反向生成、代码与 PRD 同步审计规则。\n",
         "---\n",
     ]
     for fpath in ordered_files():
@@ -91,15 +103,16 @@ def build() -> None:
         if fpath.name == "SKILL.md":
             content = normalize_skill(content)
         parts.append(f"\n{'=' * 72}\n")
-        parts.append(f"## {fpath.relative_to(SKILL_DIR)}\n")
+        parts.append(f"## {section_label(fpath, content)}\n")
         parts.append(content)
         parts.append("\n")
 
     for folder in [TEMPLATE_DIR, PROMPT_DIR]:
         for fpath in sorted(folder.glob("*.md")):
+            content = fpath.read_text(encoding="utf-8")
             parts.append(f"\n{'=' * 72}\n")
-            parts.append(f"## {fpath.relative_to(SKILL_DIR)}\n")
-            parts.append(fpath.read_text(encoding="utf-8"))
+            parts.append(f"## {section_label(fpath, content)}\n")
+            parts.append(content)
             parts.append("\n")
 
     universal = "\n".join(parts)

@@ -16,5 +16,5 @@
 
 - 业务项目根目录：`AGENTS.md`
 - 业务项目 Skill：`.agents/skills/create-prd/`
-- 业务项目 PRD：`docs/product/`
+- 业务项目 PRD：`docs/prd/`
 - 外部设计/文档工具：按需配置 MCP
