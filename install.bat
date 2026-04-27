@@ -19,7 +19,14 @@ if %ERRORLEVEL%==0 (
   goto :end
 )
 
-echo [ERROR] 未找到 Python 运行环境。请先安装 Python 3。
+echo [WARN] 未找到 Python，切换到无 Python 安装模式。
+where powershell >nul 2>nul
+if %ERRORLEVEL%==0 (
+  powershell -ExecutionPolicy Bypass -File "%~dp0scripts\install_no_python.ps1"
+  goto :end
+)
+
+echo [ERROR] 未找到 Python 或 PowerShell，无法执行安装。
 set ERR=1
 goto :done
 

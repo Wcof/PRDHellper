@@ -20,6 +20,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+try:
+    from lint_copy_rules import Violation as CopyViolation
+    from lint_copy_rules import scan_paths as scan_copy_paths
+except Exception:  # pragma: no cover
+    CopyViolation = None  # type: ignore[assignment]
+    scan_copy_paths = None  # type: ignore[assignment]
+
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = SKILL_ROOT / "references" / "templates"
 TODAY = _dt.date.today().isoformat()
@@ -245,6 +252,32 @@ def markdown_table(headers: List[str], rows: List[List[str]]) -> str:
     return "\n".join(lines)
 
 
+def collect_copy_lint_targets(project_root: Path, prd_root: str) -> List[Path]:
+    docs = project_root / prd_root
+    targets: List[Path] = []
+    if docs.exists():
+        targets.append(docs)
+    for name in ["AGENTS.md", "CLAUDE.md", "AI-PRD-WAKEUP-PROMPT.md"]:
+        p = project_root / name
+        if p.exists():
+            targets.append(p)
+    return targets
+
+
+def audit_copy_style(project_root: Path, prd_root: str) -> List[Tuple[str, str, str, str, int]]:
+    if scan_copy_paths is None or CopyViolation is None:
+        return []
+    issues: List[Tuple[str, str, str, str, int]] = []
+    targets = collect_copy_lint_targets(project_root, prd_root)
+    violations = scan_copy_paths(targets)
+    for item in violations:
+        rel = str(item.file.relative_to(project_root))
+        show = f"L{item.line}: {item.message}"
+        fix = "按 PRD 文案规范修正文案（建议项）"
+        issues.append(("文案规范建议", rel, show, fix, 1))
+    return issues
+
+
 def normalize_list(value: Any) -> List[str]:
     if isinstance(value, list):
         return [str(x).strip() for x in value if str(x).strip()]
@@ -281,11 +314,11 @@ def parse_backticked(value: str) -> str:
     return value.replace("`", "").strip()
 
 
-def ensure_prd_dirs(project_root: Path, prd_root: str = "docs/product") -> Path:
+def ensure_prd_dirs(project_root: Path, prd_root: str = "docs/prd") -> Path:
     docs = project_root / prd_root
     for d in [
         docs,
-        docs / "system-prd",
+        docs / "system",
         docs / "pages",
         docs / "changelog",
         docs / "audit",
@@ -297,7 +330,7 @@ def ensure_prd_dirs(project_root: Path, prd_root: str = "docs/product") -> Path:
     return docs
 
 
-def init_project(project_root: Path, mode: str, prd_root: str = "docs/product", force: bool = False) -> None:
+def init_project(project_root: Path, mode: str, prd_root: str = "docs/prd", force: bool = False) -> None:
     root = project_root.resolve()
     docs = ensure_prd_dirs(root, prd_root=prd_root)
 
@@ -436,7 +469,7 @@ def create_page_prd(
     route: str,
     page_name: str,
     page_file: str,
-    prd_root: str = "docs/product",
+    prd_root: str = "docs/prd",
     force: bool = False,
 ) -> Path:
     slug = route_to_slug(route)
@@ -682,7 +715,7 @@ def collect_changes(project_root: Path, prd_root: str) -> Dict[str, Dict[str, st
     return changes
 
 
-def build_traceability_index(project_root: Path, prd_root: str = "docs/product") -> Dict[str, Any]:
+def build_traceability_index(project_root: Path, prd_root: str = "docs/prd") -> Dict[str, Any]:
     pages = collect_page_docs(project_root, prd_root)
     routes = collect_routes(project_root, prd_root)
     features = collect_features(project_root, prd_root)
@@ -696,7 +729,7 @@ def build_traceability_index(project_root: Path, prd_root: str = "docs/product")
     }
 
 
-def write_traceability_index(project_root: Path, prd_root: str = "docs/product") -> Path:
+def write_traceability_index(project_root: Path, prd_root: str = "docs/prd") -> Path:
     index = build_traceability_index(project_root, prd_root=prd_root)
     out = project_root / prd_root / ".index" / "traceability.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -1104,6 +1137,7 @@ def audit_strict(project_root: Path, prd_root: str) -> List[Tuple[str, str, str,
         for f in feature_ref:
             if f not in features:
                 issues.append(("变更记录引用不存在功能", change["file"], f"{cid}->{f}", "修正 affected_feature_ids", 1))
+    issues.extend(audit_copy_style(project_root, prd_root))
     return issues
 
 
@@ -1185,28 +1219,28 @@ def main() -> None:
     p = sub.add_parser("init-project", help="初始化业务项目 PRD 体系")
     p.add_argument("project_root")
     p.add_argument("--mode", choices=["greenfield", "existing-code", "axure"], default="greenfield")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=lambda a: init_project(Path(a.project_root), a.mode, a.prd_root, a.force))
 
     p = sub.add_parser("scan-code", help="扫描代码项目路由/页面")
     p.add_argument("project_root")
-    p.add_argument("--out", default="docs/product/01-页面路由清单.md")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--out", default="docs/prd/01-页面路由清单.md")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--create-prd", action="store_true")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=cmd_scan_code)
 
     p = sub.add_parser("sync", help="同步 traceability 链路")
     p.add_argument("project_root")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--from-code", action="store_true")
     p.add_argument("--from-prd", action="store_true")
     p.set_defaults(func=cmd_sync)
 
     p = sub.add_parser("diff-sync", help="根据 git diff 输出一致性同步建议")
     p.add_argument("project_root")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--base", default="HEAD")
     p.add_argument("--staged", action="store_true")
     p.set_defaults(func=cmd_diff_sync)
@@ -1214,15 +1248,15 @@ def main() -> None:
     p = sub.add_parser("scan-axure", help="扫描 Axure 导出 HTML")
     p.add_argument("html_root")
     p.add_argument("--project-root", default=None)
-    p.add_argument("--prd-root", default="docs/product")
-    p.add_argument("--out", default="docs/product/imports/axure-pages.md")
+    p.add_argument("--prd-root", default="docs/prd")
+    p.add_argument("--out", default="docs/prd/imports/axure-pages.md")
     p.add_argument("--create-prd", action="store_true")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=cmd_scan_axure)
 
     p = sub.add_parser("audit", help="一致性审计")
     p.add_argument("project_root")
-    p.add_argument("--prd-root", default="docs/product")
+    p.add_argument("--prd-root", default="docs/prd")
     p.add_argument("--level", choices=["basic", "strict"], default="basic")
     p.add_argument("--fail-on-high", action="store_true")
     p.set_defaults(func=cmd_audit)

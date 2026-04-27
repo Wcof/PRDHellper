@@ -19,7 +19,7 @@
 Skill 层：SKILL.md 定义触发条件、模式选择、工作流程
 Template 层：references/templates 提供页面 PRD、功能清单、AGENTS.md 等模板
 Script 层：scripts/prdctl.py 提供初始化、扫描、审计命令
-Project Docs 层：业务项目 docs/product 存放真实 PRD 产物
+Project Docs 层：业务项目 docs/prd 存放真实 PRD 产物
 ```
 
 补充：项目级一致性门禁统一走：
@@ -41,6 +41,7 @@ scripts/harness/check_consistency.sh
 1. `scripts/check_consistency.sh` 是稳定入口，适合直接给 Agent 调用
 2. `scripts/harness/check_consistency.sh` 负责真实逻辑，可继续扩展
 3. 入口会优先识别代码变更并执行同步，再进行 `diff-sync + audit`
+4. `audit` 默认同时输出结构一致性问题与中文文案规范建议（建议项默认不阻断）
 
 ## 主模板策略（重要）
 
@@ -75,7 +76,7 @@ configs/template-policy.yaml
 
 | 模式 | 适用场景 | 产物 |
 |---|---|---|
-| `system-prd` | 生成完整 14 章 B 端 PRD | `docs/product/system-prd/*.md` |
+| `system` | 生成系统级 PRD | `docs/prd/system/*.md` |
 | `greenfield-page-sync` | 从零到一新项目，页面生成后同步 PRD | 页面 PRD、功能清单、变更记录 |
 | `existing-code-init` | 已有 code 项目初始化 PRD 体系 | 路由清单、功能清单、页面 PRD 草稿 |
 | `axure-html-import` | Axure HTML 逐页反向生成 PRD | Axure 页面清单、逐页 PRD |
@@ -89,13 +90,13 @@ configs/template-policy.yaml
 你的业务项目/
 ├── src/
 ├── docs/
-│   └── product/
+│   └── prd/
 │       ├── 00-项目上下文.md
 │       ├── 01-页面路由清单.md
 │       ├── 02-功能清单.md
 │       ├── 03-全局交互规则.md
 │       ├── 04-PRD编写规范.md
-│       ├── system-prd/
+│       ├── system/
 │       ├── pages/
 │       ├── changelog/
 │       ├── audit/
@@ -110,8 +111,16 @@ configs/template-policy.yaml
 其中：
 
 - `.agents/skills/create-prd/`：存放本 Skill。
-- `docs/product/`：存放当前业务项目真实 PRD 产物。
+- `docs/prd/`：存放当前业务项目真实 PRD 产物。
 - `AGENTS.md`：存放当前项目给 Codex / Agent 的长期规则。
+- `docs/prd/system/`：存放系统级正式 PRD。
+- `docs/prd/pages/`：存放页面级正式 PRD。
+
+补充约束：
+
+1. 如果 AI 只生成一个类似 `docs/prd/项目名-PRD.md` 的总文档，而 `docs/prd/system/` 和 `docs/prd/pages/` 为空，这不算完整交付。
+2. 总文档只能作为草稿或汇总视图；正式产物仍然必须拆分回 `system/` 和 `pages/`。
+3. 只要系统级 PRD 中已经明确出现页面、模式页、弹窗、抽屉或独立工作台，就应同步拆出对应页面级 PRD。
 
 ## 4. 安装方式
 
@@ -142,6 +151,7 @@ install.bat
 ```
 
 安装器会自动识别当前系统（macOS / Linux / Windows），并进入一键模式：只需选择安装场景（已有代码/新项目/Axure/全局），其余参数自动完成（自动安装、自动初始化、重复安装默认重装 Skill）。
+如果双击安装时未检测到 Python，会自动进入“无 Python 安装模式”：复制 Skill 到目标项目根目录的 `.agents/skills/create-prd/`，并注入 `AGENTS.md` / `CLAUDE.md`（含 `.agents/AGENTS.md` 与 `.claude/CLAUDE.md` 兼容文件）。
 
 如需完整向导（逐项配置）：
 
@@ -152,8 +162,8 @@ python3 install.py --wizard
 完整向导会引导你：
 
 1. 选择安装到“当前项目”还是“全局”；
-2. 若选当前项目：默认目标是 **当前工作目录**；
-3. 确认 PRD 文档目录名（默认 `docs/product`，可改成 `docs/prd` 等）；
+2. 若选当前项目：默认目标是 **业务项目根目录**；如果当前目录就是 `PRDHellper/`，则自动使用它的上一级目录；
+3. 确认 PRD 文档目录名（默认 `docs/prd`，也可改成其他 `docs/...` 路径）；
 4. 该目录会 **自动创建**，无需手动创建；
 5. 初始化默认开启，并用中文提示模式含义（新项目 / 已有代码 / Axure）。
 
@@ -179,20 +189,35 @@ AI-PRD-WAKEUP-PROMPT.md
 .agents/skills/create-prd/
 ```
 
+同时安装器会在业务项目根目录更新这两个标准发现文件：
+
+```text
+AGENTS.md
+CLAUDE.md
+```
+
+这两个文件都只注入一段轻量引导块，作用是把 AI 明确引导到真正的 create-prd Skill：
+
+```text
+.agents/skills/create-prd/SKILL.md
+```
+
+不会额外生成新的根目录发现文件，避免引入多余实体。
+
 ### 非交互安装（CI/脚本）
 
 安装到当前项目并初始化：
 
 ```bash
-python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --force
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/prd --init-project --yes --force
 ```
 
 检测到重复安装时，指定策略：
 
 ```bash
-python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --on-existing skip
-python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --on-existing reinstall
-python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/product --init-project --yes --on-existing reinstall-reset
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/prd --init-project --yes --on-existing skip
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/prd --init-project --yes --on-existing reinstall
+python3 scripts/install_skill.py --scope current --project-root /path/to/your-project --prd-root docs/prd --init-project --yes --on-existing reinstall-reset
 ```
 
 全局安装（Claude 用户级）：
@@ -261,7 +286,7 @@ python .agents/skills/create-prd/scripts/prdctl.py sync . --from-prd
 2. 严格审计会自动忽略模板中的 `[TODO: ...]` 占位行，减少初始化阶段误报。
 3. 对包含多张表格的文档（例如功能清单附加说明）会优先解析目标表头，避免串表导致 `owner_page_id` 误判。
 
-页面内 PRD 查看器（右下角 PRD 按钮，按路由查看当前页面 PRD）：
+页面内 PRD 查看器（页面顶部工具区 `PRD` 按钮，按路由查看当前页面 PRD）：
 
 ```text
 参考模板：
@@ -293,10 +318,10 @@ python .agents/skills/create-prd/scripts/prdctl.py diff-sync . --staged
 
 要求：
 1. 实现页面 code 原型；
-2. 生成或更新 docs/product/pages/management-dispatch-center.md；
-3. 更新 docs/product/02-功能清单.md；
-4. 更新 docs/product/01-页面路由清单.md；
-5. 生成或更新 docs/product/changelog/management-dispatch-center-change.md；
+2. 生成或更新 docs/prd/pages/management-dispatch-center.md；
+3. 更新 docs/prd/02-功能清单.md；
+4. 更新 docs/prd/01-页面路由清单.md；
+5. 生成或更新 docs/prd/changelog/management-dispatch-center-change.md；
 6. 完成后输出代码与 PRD 一致性检查。
 ```
 
@@ -313,7 +338,19 @@ python .agents/skills/create-prd/scripts/prdctl.py diff-sync . --staged
 ### Axure HTML 反向生成 PRD
 
 ```markdown
-请使用 create-prd Skill 读取 ./axure-html 目录，逐页生成页面级 PRD。输出到 docs/product/pages，并生成 docs/product/imports/axure-pages.md。
+请使用 create-prd Skill 读取 ./axure-html 目录，逐页生成页面级 PRD。输出到 docs/prd/pages，并生成 docs/prd/imports/axure-pages.md。
+```
+
+### 编写完整系统 PRD
+
+```markdown
+请使用 create-prd Skill 编写完整系统级 PRD。
+
+要求：
+1. 系统级内容写入 docs/prd/system/；
+2. 如果已经明确到页面、模式页、弹窗、抽屉或独立工作台，继续拆分并写入 docs/prd/pages/；
+3. 不要只交付一个 docs/prd/项目名-PRD.md 总文档；
+4. 若页面信息不足，也要先生成页面级占位草稿，并标注 TODO。
 ```
 
 ## 7. Skill / AGENTS.md / MCP 的分工
@@ -331,7 +368,7 @@ SKILL.md
 agents/openai.yaml
 configs/
 references/
-  chapters/          # 原 14 章系统级 PRD 指引
+  chapters/          # 系统级 PRD 指引
   appendices/        # 工程化、模式选择、Axure、同步审计等规则
   templates/         # 页面 PRD、变更记录、AGENTS.md 等模板
   prompts/           # 各模式可复制任务模板
@@ -366,10 +403,10 @@ docs/usage/模板自定义与维护教程.md
 
 - 模式选择
 - Codex 仓库级 Skill 安装
-- `docs/product` 初始化
+- `docs/prd` 初始化
 - 代码项目路由扫描
 - Axure HTML 扫描
 - 页面 PRD 模板
 - 页面变更记录
 - 一致性审计
-- traceability 索引（`docs/product/.index/traceability.json`）
+- traceability 索引（`docs/prd/.index/traceability.json`）

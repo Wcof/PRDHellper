@@ -1,11 +1,11 @@
 ---
 name: create-prd
-description: 根据用户提供的业务上下文，生成结构化的 B端 PRD 文档（含初始内容）。当用户要求创建、撰写、生成 PRD、需求文档、产品方案、系统设计文档时自动触发，即使用户只说"帮我写个 PRD/方案/需求文档"。
+description: 根据用户提供的业务上下文，生成结构化的系统级 PRD 文档（含初始内容）。当用户要求创建、撰写、生成 PRD、需求文档、产品方案、系统设计文档时自动触发，即使用户只说"帮我写个 PRD/方案/需求文档"。
 ---
 
 # create-prd
 
-根据用户提供的业务上下文和需求背景，生成结构化的、带有初始内容的 B端 PRD 文档。
+根据用户提供的业务上下文和需求背景，生成结构化的、带有初始内容的系统级 PRD 文档。
 
 支持显式调用（如 `/create-prd`）和自动触发（当用户明确要求创建、撰写 PRD、需求文档、产品方案或企业系统设计时）。
 
@@ -37,38 +37,38 @@ $ARGUMENTS
 
 [产品定型与章节适配](references/appendices/create-prd-appendix-typing.md)
 
-### 阶段 1：前置章节（1-9章）
+### 阶段 1：前置章节
 
-按顺序生成第1至第9章。每完成一章，**立即输出**该章内容，不要等所有章节完成后再一起输出。
+按顺序生成前置章节。每完成一章，**立即输出**该章内容，不要等所有章节完成后再一起输出。
 
 每章加载对应的生成指引：
 
-1. [第1章 项目背景](references/chapters/create-prd-ch01-background.md)
-2. [第2章 需求基本情况](references/chapters/create-prd-ch02-basic.md)
-3. [第3章 商业分析](references/chapters/create-prd-ch03-commercial.md)
-4. [第4章 项目收益目标](references/chapters/create-prd-ch04-goals.md)
-5. [第5章 项目方案概述](references/chapters/create-prd-ch05-overview.md)
-6. [第6章 项目范围](references/chapters/create-prd-ch06-scope.md)
-7. [第7章 项目风险](references/chapters/create-prd-ch07-risks.md)
-8. [第8-9章 术语与参考文献](references/chapters/create-prd-ch08-09-terms.md)
+1. [项目背景](references/chapters/create-prd-ch01-background.md)
+2. [需求基本情况](references/chapters/create-prd-ch02-basic.md)
+3. [商业分析](references/chapters/create-prd-ch03-commercial.md)
+4. [项目收益目标](references/chapters/create-prd-ch04-goals.md)
+5. [项目方案概述](references/chapters/create-prd-ch05-overview.md)
+6. [项目范围](references/chapters/create-prd-ch06-scope.md)
+7. [项目风险](references/chapters/create-prd-ch07-risks.md)
+8. [术语与参考文献](references/chapters/create-prd-ch08-09-terms.md)
 
-### 阶段 2：核心功能需求（第10章）
+### 阶段 2：核心功能需求
 
 这是 PRD 中最大、最核心的章节。加载生成指引：
 
-9. [第10章 功能需求](references/chapters/create-prd-ch10-functions.md)
+9. [功能需求](references/chapters/create-prd-ch10-functions.md)
 
 按子章节分段生成：
 - 10.1 产品框架概述（系统框架图、数据模型图、业务流程图、状态机图、功能清单）
 - 10.2 产品需求详解（逐模块：流程图 → 页面交互 → 业务规则）
 - 10.3 异常情况处理方案
 
-### 阶段 3：后置章节（11-14章）
+### 阶段 3：后置章节
 
-10. [第11章 数据埋点](references/chapters/create-prd-ch11-tracking.md)
-11. [第12章 角色和权限](references/chapters/create-prd-ch12-permissions.md)
-12. [第13章 运营计划](references/chapters/create-prd-ch13-operations.md)
-13. [第14章 待决事项](references/chapters/create-prd-ch14-tbd.md)
+10. [数据埋点](references/chapters/create-prd-ch11-tracking.md)
+11. [角色和权限](references/chapters/create-prd-ch12-permissions.md)
+12. [运营计划](references/chapters/create-prd-ch13-operations.md)
+13. [待决事项](references/chapters/create-prd-ch14-tbd.md)
 
 ### 阶段 4：自检与缺口分析
 
@@ -104,7 +104,7 @@ $ARGUMENTS
 ## 1、项目背景
 ...（各章节内容）
 
-## 14、待决事项
+## 待决事项
 ...
 
 ---
