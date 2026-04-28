@@ -16,9 +16,14 @@ scripts/harness/check_consistency.sh
 
 当前行为：
 
-1. 自动识别 `PRD_ROOT`，优先顺序为 `docs/produc` -> `docs/prd` -> `docs/product`
+1. 自动识别 `PRD_ROOT`，优先顺序为 `docs/produc` -> `docs/prd`
 2. 先按变更类型推断同步模式，再执行一致性检查
 3. 默认 `HARNESS_SYNC_MODE=auto`
+
+兼容说明：
+
+1. 代码层仍兼容识别 `docs/product`（legacy 项目）。
+2. 新项目与文档口径统一使用 `docs/prd` 或仓库内部 `docs/produc`，不再推荐 `docs/product`。
 
 同步模式说明：
 

@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "prompt": "请把当前已有代码项目初始化为 create-prd 体系，并生成页面级 PRD 草稿。",
+    "expected": "安装后能够输出 docs/prd/pages/*.md、01-页面路由清单.md、02-功能清单.md，并在 changelog 写入初始记录。",
+    "tests": "existing-code 初始化、自动 scan-code、页面级产物落盘"
+  },
+  {
+    "id": 2,
+    "prompt": "当前机器没有 Python，你仍然要让 AI 发现并使用 create-prd。",
+    "expected": "通过 AGENTS.md/CLAUDE.md（含 .agents/.claude 兼容文件）注入规则，明确输出目录是目标项目 docs/prd。",
+    "tests": "无 Python 发现链路、输出目录约束、唤醒词一致性"
+  },
+  {
+    "id": 3,
+    "prompt": "请基于 Axure HTML 目录生成页面识别清单，并补齐页面 PRD。",
+    "expected": "先生成页面识别清单，再按页面输出 docs/prd/pages/*.md 与 imports 报告。",
+    "tests": "axure-html-import 模式、先识别后写 PRD、导入报告"
+  },
+  {
+    "id": 4,
+    "prompt": "我修改了页面字段和按钮，请同步 PRD 与变更记录。",
+    "expected": "输出页面 PRD 增量、changelog、功能清单更新，并给出受影响范围。",
+    "tests": "greenfield-page-sync 模式、diff-sync/sync 路径、变更记录"
+  },
+  {
+    "id": 5,
+    "prompt": "请严格审计代码与 PRD 一致性，并给出文案规范建议。",
+    "expected": "审计报告同时包含高优先级结构问题与中文文案建议项。",
+    "tests": "consistency-audit 模式、结构审计、文案审计"
+  },
+  {
+    "id": 6,
+    "prompt": "请生成完整系统级 PRD，并确保页面级 PRD 同步拆分。",
+    "expected": "系统级文档写入 docs/prd/system/，并将已明确页面拆分到 docs/prd/pages/。",
+    "tests": "system 模式、拆分规则、禁止只产出单一总 PRD"
+  }
+]

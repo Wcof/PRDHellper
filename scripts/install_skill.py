@@ -200,6 +200,19 @@ def choose_menu(title: str, options: list[str], selected: int = 0, redraw=None) 
             return None
 
 
+def _print_next_steps(project_root: Path, prd_root: str) -> None:
+    prd_dir = project_root / prd_root
+    print("\n下一步建议：")
+    print(f"- Skill 安装位置：{project_root / '.agents/skills/create-prd'}")
+    print(f"- 目标项目根目录：{project_root}")
+    print(f"- PRD 输出目录：{prd_dir}")
+    print(f"- 页面级 PRD 目录：{prd_dir / 'pages'}")
+    print(f"- 系统级 PRD 目录：{prd_dir / 'system'}")
+    print("- 验证命令：python3 -m pytest -q")
+    print("- 发布验收：python3 scripts/verify_release.py")
+    print("- 一致性检查：bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict")
+
+
 DISCOVERY_BLOCK_START = "<!-- create-prd:start -->"
 DISCOVERY_BLOCK_END = "<!-- create-prd:end -->"
 
@@ -584,6 +597,7 @@ def run_wizard(args: argparse.Namespace) -> int:
         else:
             wakeup_reason = "安装完成-未初始化" if not init_needed else f"初始化完成-{init_mode}"
             _emit_agent_wakeup_prompt(project_root, prd_root, reason=wakeup_reason)
+        _print_next_steps(project_root, prd_root)
         return 0
 
     install_dir = _global_install_dir()

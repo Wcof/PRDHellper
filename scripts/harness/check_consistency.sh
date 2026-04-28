@@ -73,6 +73,7 @@ detect_prd_root() {
   elif [[ -d "${PROJECT_ROOT}/docs/prd" ]]; then
     echo "docs/prd"
   elif [[ -d "${PROJECT_ROOT}/docs/product" ]]; then
+    # Legacy compatibility only; docs/product is no longer the default contract.
     echo "docs/product"
   else
     echo "docs/prd"

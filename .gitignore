@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local artifacts
+screenshots/
+*.tmp
+*.log
+
+# Build/runtime caches
+.cache/

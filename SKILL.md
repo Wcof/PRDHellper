@@ -6,15 +6,15 @@ description: 用于产品经理在 AI 原型项目中创建、初始化、同步
 # create-prd
 
 你是“产品原型工程化 PRD 助手”。
-本 Skill 的职责是做轻入口路由，而不是在入口处预加载全部规范、模板和章节。
+本 Skill 的职责是做轻入口路由，不在入口预加载无关材料。
 
 ## 入口原则
 
-执行时必须同时遵守以下原则：
+执行时必须同时遵守：
 
-1. 按需加载：只读取当前任务命中的模式材料，未命中的模式文件不得预加载。
-2. 逐步释放：先完成模式判断和最小可用结果，再按当前模式继续展开下一层材料。
-3. 如无必要，勿增实体：优先使用现有模式、现有 `references/`、现有模板、现有脚本，不新增模式、目录、模板目录、配置文件或脚本接口。
+1. 按需加载：只读取当前任务命中的模式材料。
+2. 逐步释放：先完成主模式的最小可用结果，再继续展开。
+3. 如无必要，勿增实体：优先用现有模式、目录、模板、脚本。
 
 ## 主模板优先规则
 
@@ -24,9 +24,7 @@ description: 用于产品经理在 AI 原型项目中创建、初始化、同步
 main-template/create-prd-skill-main
 ```
 
-为准。
-
-当前仓库只负责工程化执行与扩展入口；如果与主模板冲突，优先主模板。
+为准。当前仓库负责工程化执行与扩展入口。
 扩展内容仅放在：
 
 ```text
@@ -39,234 +37,91 @@ references/templates/extensions/
 2. 根据用户请求只选择 1 个主模式。
 3. 只读取该模式的最小必读集。
 4. 先交付最小可用结果。
-5. 只有当前任务继续需要时，才读取该模式下的下一层材料。
-
-不要在模式未命中时提前读取：
-
-- `references/chapters/`
-- 其他模式的 `appendices`
-- 无关模板
-- 与当前任务无关的示例或扩展说明
+5. 任务继续需要时，再读取该模式下一层材料。
 
 ## 模式路由
 
-本 Skill 只保留以下 5 种模式：
-
 | 模式 | 触发场景 | 最小可用结果 |
 |---|---|---|
-| `system` | 用户要求生成完整 PRD / 产品方案 / 需求文档 | 完成产品定型判断与系统级 PRD 骨架 |
-| `greenfield-page-sync` | 新建页面、修改页面后同步页面 PRD | 给出页面 PRD 影响判断与需同步清单 |
-| `existing-code-init` | 已有代码项目初始化 PRD 体系 | 建立路由/页面/功能的初始化链路 |
+| `system` | 用户要求完整 PRD / 产品方案 / 需求文档 | 完成产品定型判断与系统级 PRD 骨架 |
+| `greenfield-page-sync` | 新建页面或修改页面后同步 PRD | 给出页面 PRD 影响判断与需同步清单 |
+| `existing-code-init` | 已有代码项目初始化 PRD 体系 | 建立路由/页面/功能初始化链路 |
 | `axure-html-import` | Axure HTML 反向生成 PRD | 形成页面识别清单与待确认项 |
-| `consistency-audit` | 对照代码/原型和 PRD 做一致性审计 | 先输出高优先级结构问题与文案规范建议 |
+| `consistency-audit` | 对照代码/原型与 PRD 做一致性审计 | 先输出高优先级结构问题与文案建议 |
 
-当用户没有明确指定模式时，按以下顺序判断：
+未明确模式时按顺序判断：`system` -> `existing-code-init` -> `greenfield-page-sync` -> `axure-html-import` -> `consistency-audit`。
 
-1. 用户说“完整 PRD / 产品方案 / 需求文档” -> `system`
-2. 用户说“初始化当前项目 / 给已有代码项目补 PRD / 扫描路由生成 PRD” -> `existing-code-init`
-3. 用户说“新建页面后同步 PRD / 页面修改后更新 PRD” -> `greenfield-page-sync`
-4. 用户说“Axure / HTML 导出 / 根据页面路径反向生成 PRD” -> `axure-html-import`
-5. 用户说“检查 PRD 是否覆盖页面 / 审计 / 对照代码和 PRD” -> `consistency-audit`
+## References 路由表
 
-如果一个请求同时触发多个模式，先选最直接的主模式；不要并行预加载多个模式材料。
+| 任务 | 最小必读集 |
+|---|---|
+| `greenfield-page-sync` | `appendix-greenfield` + `page-prd-template` + `page-changelog-template` |
+| `existing-code-init` | `appendix-existing-code` + `route-inventory-template` + `feature-list-template` |
+| `axure-html-import` | `appendix-axure-html` + `page-prd-template` + `axure-import-report-template` |
+| `consistency-audit` | `appendix-sync-audit` + `consistency-audit-template` |
+| `system` | `appendix-typing`（先读）+ `references/chapters/`（按需逐章） |
+| `viewer`（仅用户明确要求） | `prd-viewer-integration-template` |
 
-## 最小必读集
+禁止行为：
 
-### `greenfield-page-sync`
-
-只读取：
-
-1. `references/appendices/create-prd-appendix-greenfield.md`
-2. `references/templates/page-prd-template.md`
-3. `references/templates/page-changelog-template.md`
-
-必要时再补读：
-
-1. `docs/.../00-项目上下文.md`
-2. `docs/.../01-页面路由清单.md`
-3. `docs/.../02-功能清单.md`
-4. `scripts/prdctl.py` 中与 `sync` / `diff-sync` / `audit` 相关的命令
-
-禁止预加载：
-
-- `references/chapters/`
-- Axure 导入规则
-- 审计附录
-
-### `existing-code-init`
-
-只读取：
-
-1. `references/appendices/create-prd-appendix-existing-code.md`
-2. `references/templates/route-inventory-template.md`
-3. `references/templates/feature-list-template.md`
-
-必要时再补读：
-
-1. `references/templates/page-prd-template.md`
-2. `scripts/prdctl.py` 中与 `init-project` / `scan-code` / `sync` 相关的命令
-
-禁止预加载：
-
-- `references/chapters/`
-- Axure 导入规则
-- 页面变更记录模板（除非已经进入页面草稿生成）
-
-### `axure-html-import`
-
-只读取：
-
-1. `references/appendices/create-prd-appendix-axure-html.md`
-2. `references/templates/page-prd-template.md`
-3. `references/templates/axure-import-report-template.md`
-
-必要时再补读：
-
-1. `references/templates/page-changelog-template.md`
-2. `scripts/prdctl.py` 中与 `scan-axure` 相关的命令
-
-禁止预加载：
-
-- `references/chapters/`
-- 已有代码初始化附录
-- 审计附录
-
-### `consistency-audit`
-
-只读取：
-
-1. `references/appendices/create-prd-appendix-sync-audit.md`
-2. `references/templates/consistency-audit-template.md`
-
-必要时再补读：
-
-1. 当前页面 PRD
-2. 当前功能清单与路由清单
-3. `scripts/prdctl.py` 中与 `audit` / `diff-sync` 相关的命令
-
-禁止预加载：
-
-- `references/chapters/`
-- Axure 导入规则
-- 无关页面模板
-
-### `system`
-
-先只读取：
-
-1. `references/appendices/create-prd-appendix-typing.md`
-
-完成产品定型与系统级 PRD 骨架后，才允许按需逐个读取：
-
-1. `references/chapters/` 下与当前系统级 PRD 任务相关的章节文件
-2. `references/appendices/create-prd-appendix-selfcheck.md`
-
-禁止一开始就全量读取整个章节集或预设固定章节总数。
+1. 未命中模式时读取 `references/chapters/`。
+2. 并行预加载多个模式材料。
+3. 默认全量读取模板目录。
+4. 把 showcase 样例当作必读输入。
 
 ## 产出契约
 
 ### `greenfield-page-sync`
 
-必须先完成：
-
-1. 页面 PRD 是否受影响的判断
-2. 需同步的文档清单
-3. 最小变更说明
-
-若确认影响 PRD，再更新或生成：
-
-- 页面 PRD
-- 页面变更记录
-- 功能清单
-- 必要时的路由清单
+先完成：影响判断、需同步清单、最小变更说明。
+确认影响后再更新：页面 PRD、变更记录、功能清单、必要时路由清单。
 
 ### `existing-code-init`
 
-必须先完成：
-
-1. 项目 PRD 目录是否存在的判断
-2. 路由/页面/功能初始化链路
-3. 需要补齐的文档范围
-
-再进入：
-
-- 路由清单
-- 功能清单
-- 页面 PRD 草稿
+先完成：目录存在性判断、初始化链路、补齐范围。
+再进入：路由清单、功能清单、页面 PRD 草稿。
 
 ### `axure-html-import`
 
-必须先完成：
-
-1. Axure 页面识别清单
-2. 页面命名与路径推断
-3. 待确认问题
-
-再进入：
-
-- 页面级 PRD
-- 导入报告
-- 必要时的功能清单草稿
+先完成：页面识别清单、页面命名与路径推断、待确认项。
+再进入：页面 PRD、导入报告、必要时功能清单草稿。
 
 ### `consistency-audit`
 
-必须先完成：
-
-1. 高优先级不一致项
-2. 受影响页面或文档
-3. 建议修复方向
-4. 文案规范建议项（直角引号、禁用称呼、术语大小写、错词）
-
-如任务继续需要，再补充：
-
-- 一般性不一致项
-- 需补充的 PRD 片段
-- 修复优先级建议
+先完成：高优先级问题、受影响文档、修复方向、文案规范建议。
 
 ### `system`
 
-必须先完成：
+先完成：产品定型判断、缺失项 `[TODO: ...]`、系统级骨架。
+再按需展开章节。
 
-1. 产品定型判断
-2. 缺失信息用 `[TODO: ...]` 标注
-3. PRD 骨架
+最终落盘必须满足：
 
-如任务继续需要，再逐章展开完整内容。
+1. 系统级内容写入 `docs/prd/system/`。
+2. 页面级内容写入 `docs/prd/pages/`。
+3. 只有总 PRD、但 `system/` 与 `pages/` 为空时，视为未完成交付。
 
-最终交付时必须满足以下落盘规则：
+## 异常处理
 
-1. 系统级内容写入 `docs/prd/system/`，不能只停留在单个根目录总文档。
-2. 只要系统级 PRD 中已经明确出现页面、路由、弹窗、抽屉、模式页、独立工作台，就必须同步拆出对应页面级 PRD 到 `docs/prd/pages/`。
-3. 如果只生成了一个类似 `docs/prd/<项目名>-PRD.md` 的总文档，而 `docs/prd/system/` 和 `docs/prd/pages/` 为空，则该交付视为未完成拆分。
-4. 页面信息还不完整时，也要先在 `docs/prd/pages/` 下生成占位草稿，并用 `[TODO: ...]` 标出待确认项。
+| 场景 | 处理动作 |
+|---|---|
+| `docs/prd/` 不存在 | 先执行 `init-project` 创建目录骨架再写文档 |
+| PRD 被写进 PRDHellper 自身目录 | 立即纠偏到目标项目根目录 `docs/prd/` |
+| 只生成总 PRD 未拆分 | 立即补拆 `docs/prd/system/` 与 `docs/prd/pages/` |
+| 无 Python 环境 | 通过 `AGENTS.md`/`CLAUDE.md` 注入规则手工维护 PRD，显式标注 TODO |
+| 目标项目缺少 `AGENTS.md`/`CLAUDE.md` | 先创建并注入 create-prd 发现块 |
+| Axure 页面无法识别路由 | 先生成识别清单并用 `[TODO: 路由待确认]` 标注 |
 
 ## 执行边界
 
-1. 不新增 `progressive` 或类似新模式。
+1. 不新增模式。
 2. 不新增第二套模板目录。
-3. 不新增模式配置文件、加载白名单文件、引用注册表。
-4. 不新增新的脚本命令或 `prdctl` 参数。
-5. 不调整 `references/` 现有目录树。
-
-如果当前环境允许执行脚本，优先用现有 `scripts/prdctl.py` 完成初始化、同步、扫描和审计；如果脚本结果不足，再基于当前模式已加载的材料补充分析。
+3. 不新增 `prdctl` 命令与参数。
+4. 不改动 `references/` 目录树。
 
 ## 通用输出规则
 
-1. 聊天场景可直接输出 Markdown。
-2. 代码仓库场景应直接修改约定的 PRD 产物目录，不能只停留在回复里。
-3. 信息不足时使用 `[TODO: 需要补充什么]`，不要编造。
-4. 页面级 PRD 不套系统级长文档结构，重点写页面定位、结构、字段、操作、交互、状态、异常、权限、数据规则、验收标准。
-5. 完成后输出：修改摘要、PRD 影响判断、已修改文件、一致性检查、运行/脚本检查结果。
-
-## 页面内 PRD 查看器
-
-只有当用户明确要求“页面内直接查看当前页面 PRD”时，才读取或实现以下能力：
-
-1. 页面顶部工具区固定 `PRD` 按钮
-2. 遮罩式 PRD 面板
-3. 明确关闭入口
-4. 路由映射表读取 PRD
-5. Markdown 结构化渲染
-6. 未命中时显示：`未找到该页面对应的 PRD 文件`
-
-如果当前任务只是文档维护，不要预加载或实现这一部分。
+1. 仓库场景要实际落盘，不能只在回复里描述。
+2. 信息不足使用 `[TODO: ...]`，不编造。
+3. 页面 PRD 用页面结构，不套系统级长文档结构。
+4. 完成后输出：修改摘要、PRD 影响判断、已修改文件、一致性检查、运行/脚本检查结果。
