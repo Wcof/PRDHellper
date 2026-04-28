@@ -2111,6 +2111,18 @@ docs/prd/pages/<slug>.md
 
 页面代码发生功能、字段、按钮、交互、状态、权限、数据逻辑、异常处理、路由入口变化时，必须同步更新页面 PRD。
 
+## 6. 中文文案规范（建议型）
+
+1. 可见正文统一使用直角引号 `「」`，避免 `"`、`“`、`”`。
+2. 避免使用 `你`、`您`、`同学` 这类直接称呼。
+3. 中文与英文/数字混排时，按可读性保留必要空格。
+4. 常见术语保持统一写法：`ID`、`HTTP`、`URL`、`JSON`、`API`、`AI`。
+5. AI 术语与中文错词建议修正，例如：`chatgpt -> ChatGPT`、`openai api -> OpenAI API`、`登陆 -> 登录`、`阀值 -> 阈值`。
+
+说明：
+- 以上规则默认作为审计建议项，不阻断交付。
+- 代码字面量、JSON 键名、URL、API 路径等机器可读内容不做机械改写。
+
 
 
 
@@ -2195,7 +2207,8 @@ bash scripts/check_consistency.sh . --mode=strict
 说明：
 - `scripts/check_consistency.sh` 是项目级统一检查入口。
 - 当前入口会转发到 `scripts/harness/check_consistency.sh`，后续扩展更多约束时仍保持该入口不变。
-- 该入口默认会按变更类型自动选择 `sync --from-code` 或 `sync --from-prd`，然后再执行一致性检查。
+- 该入口默认会按变更类型自动选择 `sync --from-code` 或 `sync --from-prd`，然后执行一致性检查。
+- 一致性检查同时覆盖：结构链路（路由/功能/变更/traceability）与中文文案规范建议项。
 
 ## 新增页面规则
 

@@ -9,5 +9,5 @@ install_targets:
     path: dist/create-prd-universal-prompt.md
     description: 任意大模型可复制粘贴使用的完整 Prompt。
   project_docs:
-    path: docs/product
-    description: 业务项目真实 PRD 产物目录，不存放 Skill 源码。
+    path: docs/prd
+    description: 目标项目真实 PRD 产物目录，不存放 Skill 源码。

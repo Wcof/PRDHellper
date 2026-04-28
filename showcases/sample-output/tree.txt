@@ -1,0 +1,18 @@
+docs/prd/
+├── 00-项目上下文.md
+├── 01-页面路由清单.md
+├── 02-功能清单.md
+├── 03-全局交互规则.md
+├── 04-PRD编写规范.md
+├── system/
+│   └── 智能巡检系统-PRD.md
+├── pages/
+│   └── inspection-dashboard.md
+├── changelog/
+│   └── inspection-dashboard-change.md
+├── audit/
+│   └── 2026-04-28-consistency-audit.md
+├── imports/
+├── templates/
+└── .index/
+    └── traceability.json
