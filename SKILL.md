@@ -58,7 +58,7 @@ references/templates/extensions/
 | `greenfield-page-sync` | 新建页面、修改页面后同步页面 PRD | 给出页面 PRD 影响判断与需同步清单 |
 | `existing-code-init` | 已有代码项目初始化 PRD 体系 | 建立路由/页面/功能的初始化链路 |
 | `axure-html-import` | Axure HTML 反向生成 PRD | 形成页面识别清单与待确认项 |
-| `consistency-audit` | 对照代码/原型和 PRD 做一致性审计 | 先输出高优先级不一致项 |
+| `consistency-audit` | 对照代码/原型和 PRD 做一致性审计 | 先输出高优先级结构问题与文案规范建议 |
 
 当用户没有明确指定模式时，按以下顺序判断：
 
@@ -215,6 +215,7 @@ references/templates/extensions/
 1. 高优先级不一致项
 2. 受影响页面或文档
 3. 建议修复方向
+4. 文案规范建议项（直角引号、禁用称呼、术语大小写、错词）
 
 如任务继续需要，再补充：
 

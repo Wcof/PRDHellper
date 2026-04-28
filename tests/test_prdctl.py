@@ -377,3 +377,78 @@ def test_diff_sync_treats_component_changes_as_code_changes(tmp_path: Path):
     assert report.exists()
     text = report.read_text(encoding="utf-8")
     assert "需执行 `prdctl sync --from-code`" in text
+
+
+def test_audit_strict_reports_copy_style_suggestions(tmp_path: Path):
+    run_cli("init-project", str(tmp_path), "--mode", "greenfield")
+    page = tmp_path / "docs/prd/pages/style-demo.md"
+    page.write_text(
+        """---
+page_id: page-style-demo
+route: /style-demo
+code_paths: ["src/pages/style-demo.tsx"]
+feature_ids: ["feat-style-demo-core"]
+change_ids: ["chg-style-demo-init"]
+last_synced_at: 2026-04-20
+---
+# 页面 PRD：文案检查
+
+## 1. 页面基础信息
+系统提示为 "ok"
+## 2. 页面目标
+你可以在此查看数据。
+## 3. 页面结构
+## 4. 字段说明
+## 5. 操作说明
+## 6. 交互规则
+## 7. 状态流转
+## 8. 异常场景
+## 9. 权限规则
+## 10. 数据规则
+## 11. 验收标准
+""",
+        encoding="utf-8",
+    )
+    run_cli("sync", str(tmp_path), "--from-prd")
+    result = run_cli("audit", str(tmp_path), "--level", "strict")
+    assert result.returncode == 0, result.stderr
+
+    audit_file = tmp_path / f"docs/prd/audit/{dt.date.today().isoformat()}-consistency-audit.md"
+    text = audit_file.read_text(encoding="utf-8")
+    assert "文案规范建议" in text
+    assert "style-demo.md" in text
+
+
+def test_copy_style_suggestions_do_not_trigger_fail_on_high(tmp_path: Path):
+    run_cli("init-project", str(tmp_path), "--mode", "greenfield")
+    page = tmp_path / "docs/prd/pages/nonblocking-style.md"
+    page.write_text(
+        """---
+page_id: page-nonblocking-style
+route: /nonblocking-style
+code_paths: ["src/pages/nonblocking-style.tsx"]
+feature_ids: ["feat-nonblocking-style-core"]
+change_ids: ["chg-nonblocking-style-init"]
+last_synced_at: 2026-04-20
+---
+# 页面 PRD：建议项
+
+## 1. 页面基础信息
+提示信息 "demo"
+## 2. 页面目标
+您可以查看状态。
+## 3. 页面结构
+## 4. 字段说明
+## 5. 操作说明
+## 6. 交互规则
+## 7. 状态流转
+## 8. 异常场景
+## 9. 权限规则
+## 10. 数据规则
+## 11. 验收标准
+""",
+        encoding="utf-8",
+    )
+    run_cli("sync", str(tmp_path), "--from-prd")
+    result = run_cli("audit", str(tmp_path), "--level", "strict", "--fail-on-high")
+    assert result.returncode == 0, result.stderr

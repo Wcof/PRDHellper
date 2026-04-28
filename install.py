@@ -32,11 +32,7 @@ def main() -> int:
     print("入口已统一为 install.py（跨平台自动识别系统）。")
 
     args = list(sys.argv[1:])
-    if "--wizard" in args:
-        args = [a for a in args if a != "--wizard"]
-        cmd = [sys.executable, str(installer), *args]
-    else:
-        cmd = [sys.executable, str(installer), "--one-click", *args]
+    cmd = [sys.executable, str(installer), *args]
     return subprocess.call(cmd)
 
 

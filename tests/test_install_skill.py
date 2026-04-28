@@ -135,6 +135,7 @@ def test_existing_code_mode_emits_backfill_wakeup_prompt(tmp_path: Path):
     assert "已有页面补全 PRD" in text
     assert "scan-code" in text
     assert "check_consistency.sh" in text
+    assert "文案规范建议" in text
     assert "CLAUDE.md" in text
     assert "不要写到 `PRDHellper/docs/`" in text
     assert ".agents/skills/create-prd/" in text
@@ -230,17 +231,29 @@ def test_install_injects_discovery_block_into_agents_and_claude(tmp_path: Path):
     assert result.returncode == 0, result.stderr
     agents = tmp_path / "AGENTS.md"
     claude = tmp_path / "CLAUDE.md"
+    agents_hidden = tmp_path / ".agents" / "AGENTS.md"
+    claude_hidden = tmp_path / ".claude" / "CLAUDE.md"
     assert agents.exists()
     assert claude.exists()
+    assert agents_hidden.exists()
+    assert claude_hidden.exists()
     agents_text = agents.read_text(encoding="utf-8")
     claude_text = claude.read_text(encoding="utf-8")
+    agents_hidden_text = agents_hidden.read_text(encoding="utf-8")
+    claude_hidden_text = claude_hidden.read_text(encoding="utf-8")
     assert "<!-- create-prd:start -->" in agents_text
     assert ".agents/skills/create-prd/SKILL.md" in agents_text
+    assert "文案规范建议审计" in agents_text
     assert "不要写到 `PRDHellper/docs/`" in agents_text
     assert ".agents/skills/create-prd/" in agents_text
     assert "<!-- create-prd:start -->" in claude_text
     assert ".agents/skills/create-prd/SKILL.md" in claude_text
+    assert "文案规范建议审计" in claude_text
     assert "先把目标项目根目录下的目录建出来再写 Markdown 内容" in claude_text
+    assert "<!-- create-prd:start -->" in agents_hidden_text
+    assert ".agents/skills/create-prd/SKILL.md" in agents_hidden_text
+    assert "<!-- create-prd:start -->" in claude_hidden_text
+    assert ".agents/skills/create-prd/SKILL.md" in claude_hidden_text
 
 
 def test_install_preserves_existing_agents_and_updates_discovery_block(tmp_path: Path):
@@ -268,6 +281,71 @@ def test_install_preserves_existing_agents_and_updates_discovery_block(tmp_path:
     assert agents_text.count("<!-- create-prd:start -->") == 1
     assert ".agents/skills/create-prd/SKILL.md" in agents_text
     assert claude_text.count("<!-- create-prd:start -->") == 1
+
+
+def test_status_flag_prints_status(tmp_path: Path):
+    result = run_install("--status", "--project-root", str(tmp_path))
+    assert result.returncode == 0, result.stderr
+    assert "Target Project:" in result.stdout
+    assert "Skill:" in result.stdout
+    assert "PRD Docs:" in result.stdout
+    assert "AGENTS.md" in result.stdout
+    assert "CLAUDE.md" in result.stdout
+    assert "Python:" in result.stdout
+    assert "Configure create-prd Skill" in result.stdout
+
+
+def test_render_menu_marks_selected_option():
+    mod = load_install_module()
+    text = mod.render_menu("请选择操作", ["一键配置", "工具配置", "退出"], 1)
+    assert "◆ 请选择操作" in text
+    assert "  一键配置" in text
+    assert "❯ 工具配置" in text
+
+
+def test_handle_menu_key_moves_selects_and_cancels():
+    mod = load_install_module()
+    assert mod.handle_menu_key("down", 0, 3) == (1, "move")
+    assert mod.handle_menu_key("up", 0, 3) == (2, "move")
+    assert mod.handle_menu_key("enter", 1, 3) == (1, "select")
+    assert mod.handle_menu_key("right", 1, 3) == (1, "select")
+    assert mod.handle_menu_key("esc", 1, 3) == (1, "cancel")
+    assert mod.handle_menu_key("left", 1, 3) == (1, "cancel")
+    assert mod.handle_menu_key("q", 1, 3) == (1, "cancel")
+
+
+def test_yes_bypasses_homepage_and_installs(tmp_path: Path):
+    helper = tmp_path / "PRDHellper"
+    helper.mkdir()
+    result = subprocess.run(
+        [sys.executable, str(INSTALL), "--yes"],
+        cwd=str(helper),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (helper / ".agents/skills/create-prd/SKILL.md").exists()
+    assert (helper / "docs/prd").exists()
+    assert "请选择操作" not in result.stdout
+
+
+def test_wizard_flag_preserves_old_wizard(tmp_path: Path):
+    result = run_install(
+        "--wizard",
+        "--scope",
+        "current",
+        "--project-root",
+        str(tmp_path),
+        "--prd-root",
+        "docs/prd",
+        "--init-project",
+        "--yes",
+        "--on-existing",
+        "reinstall",
+    )
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / ".agents/skills/create-prd/SKILL.md").exists()
 
 
 def test_resolve_effective_project_root_uses_parent_for_helper_repo_root():

@@ -11,7 +11,10 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import os
+import re
 import shutil
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -60,6 +63,143 @@ def _global_install_dir() -> Path:
     return Path.home() / ".claude" / "skills" / "create-prd"
 
 
+_LOGO = """
+██████╗ ██████╗ ██████╗     ██╗  ██╗███████╗██╗     ██████╗ ███████╗██████╗
+██╔══██╗██╔══██╗██╔══██╗    ██║  ██║██╔════╝██║     ██╔══██╗██╔════╝██╔══██╗
+██████╔╝██████╔╝██║  ██║    ███████║█████╗  ██║     ██████╔╝█████╗  ██████╔╝
+██╔═══╝ ██╔══██╗██║  ██║    ██╔══██║██╔══╝  ██║     ██╔═══╝ ██╔══╝  ██╔══██╗
+██║     ██║  ██║██████╔╝    ██║  ██║███████╗███████╗██║     ███████╗██║  ██║
+╚═╝     ╚═╝  ╚═╝╚═════╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝
+""".strip()
+
+
+def _get_version() -> str:
+    readme = SKILL_REPO_ROOT / "README.md"
+    if readme.exists():
+        text = safe_read(readme, limit=10_000)
+        m = re.search(r"v(\d+\.\d+\.\d+)", text)
+        if m:
+            return f"v{m.group(1)}"
+    return "v0.1.0"
+
+
+def _check_status(project_root: Path, prd_root: str) -> dict[str, tuple[bool, str]]:
+    install_dir = _current_install_dir(project_root)
+    prd_dir = project_root / prd_root
+    return {
+        "Target Project": (True, str(project_root)),
+        "Skill": (install_dir.exists(), str(install_dir) if install_dir.exists() else "未安装"),
+        "PRD Docs": (prd_dir.exists() and any(prd_dir.iterdir()), str(prd_dir) if prd_dir.exists() else "未创建"),
+        "AGENTS.md": ((project_root / "AGENTS.md").exists(), ""),
+        "CLAUDE.md": ((project_root / "CLAUDE.md").exists(), ""),
+        "Python": (sys.version_info >= (3, 9), f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"),
+    }
+
+
+def render_homepage(project_root: Path, prd_root: str, status: dict[str, tuple[bool, str]] | None = None) -> None:
+    print(_LOGO)
+    print()
+    print(f"{_get_version()} · Configure create-prd Skill for AI PRD workflow")
+    print()
+    print("一键配置")
+    print("  ◆ Claude Code")
+    print("  ◆ Codex")
+    print("  ◆ Trae")
+    print("  ◆ Other Agents")
+    print()
+    print("状态")
+    if status is None:
+        status = _check_status(project_root, prd_root)
+    for name, (ok, detail) in status.items():
+        marker = "✓" if ok else "✗"
+        line = f"  {marker} {name}"
+        if detail:
+            line += f": {detail}"
+        print(line)
+    print()
+
+
+def clear_screen() -> None:
+    print("\033[2J\033[H", end="")
+
+
+def read_key() -> str:
+    if os.name == "nt":
+        import msvcrt
+
+        ch = msvcrt.getwch()
+        if ch in {"\x00", "\xe0"}:
+            code = msvcrt.getwch()
+            return {
+                "H": "up",
+                "P": "down",
+                "K": "left",
+                "M": "right",
+            }.get(code, code)
+        if ch in {"\r", "\n"}:
+            return "enter"
+        if ch == "\x1b":
+            return "esc"
+        return ch
+
+    import termios
+    import tty
+
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+        if ch == "\x1b":
+            seq = sys.stdin.read(2)
+            return {
+                "[A": "up",
+                "[B": "down",
+                "[D": "left",
+                "[C": "right",
+            }.get(seq, "esc")
+        if ch in {"\r", "\n"}:
+            return "enter"
+        return ch
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+
+def render_menu(title: str, options: list[str], selected: int) -> str:
+    lines = [f"◆ {title}"]
+    for idx, option in enumerate(options):
+        prefix = "❯" if idx == selected else " "
+        lines.append(f"{prefix} {option}")
+    return "\n".join(lines)
+
+
+def handle_menu_key(key: str, selected: int, count: int) -> tuple[int, str]:
+    if key == "up":
+        return (selected - 1) % count, "move"
+    if key == "down":
+        return (selected + 1) % count, "move"
+    if key in {"enter", "right"}:
+        return selected, "select"
+    if key in {"left", "esc", "q", "Q"}:
+        return selected, "cancel"
+    return selected, "noop"
+
+
+def choose_menu(title: str, options: list[str], selected: int = 0, redraw=None) -> Optional[int]:
+    while True:
+        clear_screen()
+        if redraw:
+            redraw()
+        print(render_menu(title, options, selected))
+        print("\n↑/↓ 移动，Enter/→ 确认，Esc/←/q 退出")
+        key = read_key()
+        selected, action = handle_menu_key(key, selected, len(options))
+        if action == "select":
+            return selected
+        if action == "cancel":
+            return None
+
+
 DISCOVERY_BLOCK_START = "<!-- create-prd:start -->"
 DISCOVERY_BLOCK_END = "<!-- create-prd:end -->"
 
@@ -75,8 +215,9 @@ def _discovery_block_content(prd_root: str) -> str:
             "1. 优先阅读 `.agents/skills/create-prd/SKILL.md`。",
             f"2. PRD 输出目录固定写到目标项目根目录下的 `{prd_root}`，不要写到 `PRDHellper/docs/` 或 `.agents/skills/create-prd/` 内。",
             f"3. 如果 `{prd_root}` 或其子目录不存在，先执行 `python .agents/skills/create-prd/scripts/prdctl.py init-project . --mode existing-code --prd-root {prd_root}`，先把目标项目根目录下的目录建出来再写 Markdown 内容。",
-            "4. 完成后执行：`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。",
-            "5. 如果仓库里还有其他 `SKILL.md` 或说明文件，不要把它们当作 create-prd 本体。",
+            "4. 完成后执行：`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`（包含结构一致性与文案规范建议审计）。",
+            "5. 如果目标项目没有 Python，可跳过脚本命令，直接按 `.agents/skills/create-prd/SKILL.md` 与项目 AGENTS 规则手工维护 PRD 文档。",
+            "6. 如果仓库里还有其他 `SKILL.md` 或说明文件，不要把它们当作 create-prd 本体。",
             "",
             DISCOVERY_BLOCK_END,
         ]
@@ -85,6 +226,7 @@ def _discovery_block_content(prd_root: str) -> str:
 
 def _upsert_discovery_block(path: Path, heading: str, prd_root: str) -> Path:
     block = _discovery_block_content(prd_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = safe_read(path, limit=2_000_000) if path.exists() else ""
     if DISCOVERY_BLOCK_START in text and DISCOVERY_BLOCK_END in text:
         start = text.index(DISCOVERY_BLOCK_START)
@@ -102,6 +244,8 @@ def _upsert_discovery_block(path: Path, heading: str, prd_root: str) -> Path:
 def _ensure_discovery_files(project_root: Path, prd_root: str) -> None:
     _upsert_discovery_block(project_root / "AGENTS.md", "AGENTS", prd_root)
     _upsert_discovery_block(project_root / "CLAUDE.md", "CLAUDE", prd_root)
+    _upsert_discovery_block(project_root / ".agents" / "AGENTS.md", "AGENTS", prd_root)
+    _upsert_discovery_block(project_root / ".claude" / "CLAUDE.md", "CLAUDE", prd_root)
 
 
 def _ensure_unique_backup_path(path: Path) -> Path:
@@ -240,8 +384,9 @@ def _emit_agent_wakeup_prompt(project_root: Path, prd_root: str, reason: str, sc
             f"2. 所有 PRD 产物都写到目标项目根目录下的 `{prd_root}`，不要写到 `PRDHellper/docs/` 或 `.agents/skills/create-prd/` 内。",
             f"3. 若 `{prd_root}` 不存在，先执行 `python .agents/skills/create-prd/scripts/prdctl.py init-project . --mode existing-code --prd-root {prd_root}`，先创建目标项目根目录下的目录结构。",
             f"4. 扫描现有路由和页面，并补齐页面 PRD / 功能清单 / 变更记录。重点补齐目录：`{prd_root}/pages`、`{prd_root}/02-功能清单.md`、`{prd_root}/changelog`。",
-            f"5. 执行并汇报：`python .agents/skills/create-prd/scripts/prdctl.py scan-code . --create-prd --prd-root {prd_root}`、`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。该入口会自动同步再审计。",
-            "6. 输出：补全了哪些页面、哪些仍待确认（TODO）。",
+            f"5. 执行并汇报：`python .agents/skills/create-prd/scripts/prdctl.py scan-code . --create-prd --prd-root {prd_root}`、`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。该入口会自动同步，并输出结构审计与文案规范建议。",
+            "6. 如果没有 Python，跳过脚本执行，直接按 Skill 规则补全页面 PRD 与清单，并显式标注 `[TODO: ...]`。",
+            "7. 输出：补全了哪些页面、哪些仍待确认（TODO）。",
         ]
     else:
         title = "# create-prd 唤醒词（复制到你的 AI 对话中）"
@@ -252,7 +397,8 @@ def _emit_agent_wakeup_prompt(project_root: Path, prd_root: str, reason: str, sc
             f"3. 若 `{prd_root}` 不存在，先执行 `python .agents/skills/create-prd/scripts/prdctl.py init-project . --mode existing-code --prd-root {prd_root}`，先创建目标项目根目录下的目录结构。",
             f"4. 阅读 `{prd_root}` 下已有文档（至少 `00-项目上下文.md`、`01-页面路由清单.md`、`02-功能清单.md`）。",
             "5. 基于当前代码与路由，补齐或更新页面 PRD、功能清单、变更记录。",
-            f"6. 执行并汇报：`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。该入口会自动同步再审计。",
+            f"6. 执行并汇报：`bash .agents/skills/create-prd/scripts/check_consistency.sh . --mode=strict`。该入口会自动同步，并输出结构审计与文案规范建议。",
+            "7. 如果没有 Python，跳过脚本执行，直接按 Skill 规则完成文档更新并输出一致性结论。",
         ]
 
     prompt = "\n".join(
@@ -286,6 +432,64 @@ def _bootstrap_existing_code_prd(project_root: Path, prd_root: str) -> None:
         )
     )
     print(f"已为已有代码项目生成页面级 PRD 草稿：{project_root / prd_root / 'pages'}")
+
+
+def run_status(args: argparse.Namespace) -> int:
+    project_root = resolve_effective_project_root(Path(args.project_root)) if args.project_root else _default_project_root()
+    prd_root = args.prd_root
+    status = _check_status(project_root, prd_root)
+    render_homepage(project_root, prd_root, status)
+    return 0
+
+
+def run_tool_config(args: argparse.Namespace) -> int:
+    choice = choose_menu("工具配置", ["当前项目", "全局 Claude 用户目录", "返回"])
+    if choice is None or choice == 2:
+        return 0
+    new_args = argparse.Namespace(**vars(args))
+    if choice == 1:
+        new_args.quick_mode = "global"
+    else:
+        new_args.quick_mode = "existing-code"
+    return run_one_click(new_args)
+
+
+def run_prd_config(args: argparse.Namespace) -> int:
+    print("\n== PRD 目录配置 ==")
+    prd_root = input(f"PRD 文档目录名 [{args.prd_root}]: ").strip() or args.prd_root
+    new_args = argparse.Namespace(**vars(args))
+    new_args.prd_root = prd_root
+    new_args.quick_mode = "existing-code"
+    return run_one_click(new_args)
+
+
+def run_homepage_menu(args: argparse.Namespace) -> int:
+    try:
+        while True:
+            project_root = resolve_effective_project_root(Path(args.project_root)) if args.project_root else _default_project_root()
+            prd_root = args.prd_root
+            choice = choose_menu(
+                "请选择操作",
+                ["一键配置", "工具配置", "PRD 目录配置", "状态检查", "退出"],
+                redraw=lambda: render_homepage(project_root, prd_root, _check_status(project_root, prd_root)),
+            )
+
+            if choice is None or choice == 4:
+                print("已退出。")
+                return 0
+            if choice == 0:
+                return run_one_click(args)
+            elif choice == 1:
+                return run_tool_config(args)
+            elif choice == 2:
+                return run_prd_config(args)
+            elif choice == 3:
+                clear_screen()
+                run_status(args)
+                input("\n按 Enter 返回主菜单...")
+    except KeyboardInterrupt:
+        print("\n已退出。")
+        return 0
 
 
 def run_wizard(args: argparse.Namespace) -> int:
@@ -416,14 +620,17 @@ def run_one_click(args: argparse.Namespace) -> int:
     """
     mode = args.quick_mode
     if not mode:
-        print("== create-prd 一键安装 ==")
-        print("请选择安装场景：")
-        print("1) 当前项目（已有代码，推荐）")
-        print("2) 当前项目（新项目）")
-        print("3) 当前项目（Axure HTML）")
-        print("4) 全局安装（Claude 用户目录）")
-        choice = _ask("输入 1/2/3/4", "1")
-        mode = {"1": "existing-code", "2": "greenfield", "3": "axure", "4": "global"}.get(choice, "existing-code")
+        if args.yes or not sys.stdin.isatty():
+            mode = "existing-code"
+        else:
+            print("== create-prd 一键安装 ==")
+            print("请选择安装场景：")
+            print("1) 当前项目（已有代码，推荐）")
+            print("2) 当前项目（新项目）")
+            print("3) 当前项目（Axure HTML）")
+            print("4) 全局安装（Claude 用户目录）")
+            choice = _ask("输入 1/2/3/4", "1")
+            mode = {"1": "existing-code", "2": "greenfield", "3": "axure", "4": "global"}.get(choice, "existing-code")
 
     if mode == "global":
         auto_args = argparse.Namespace(
@@ -462,6 +669,8 @@ def run_one_click(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="create-prd 安装向导")
     p.add_argument("--one-click", action="store_true", help="一键安装：只选模式，其他配置使用默认值并自动执行")
+    p.add_argument("--wizard", action="store_true", help="进入传统安装向导（保留旧交互）")
+    p.add_argument("--status", action="store_true", help="只读状态检查，打印当前安装状态")
     p.add_argument(
         "--quick-mode",
         choices=["existing-code", "greenfield", "axure", "global"],
@@ -480,10 +689,46 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _has_wizard_flags(args: argparse.Namespace) -> bool:
+    return bool(
+        args.scope
+        or args.project_root
+        or args.init_project
+        or args.init_mode != "greenfield"
+        or args.on_existing
+    )
+
+
+def _is_bare_invocation(args: argparse.Namespace) -> bool:
+    return not (
+        args.wizard
+        or args.status
+        or args.yes
+        or args.one_click
+        or args.quick_mode
+        or args.reset_docs
+        or args.force
+        or _has_wizard_flags(args)
+    )
+
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    code = run_one_click(args) if args.one_click else run_wizard(args)
+    if args.wizard:
+        code = run_wizard(args)
+    elif args.status:
+        code = run_status(args)
+    elif args.one_click or args.quick_mode or args.reset_docs:
+        code = run_one_click(args)
+    elif args.yes and not _has_wizard_flags(args):
+        code = run_one_click(args)
+    elif not sys.stdin.isatty() and not _has_wizard_flags(args):
+        code = run_one_click(args)
+    elif _is_bare_invocation(args) and sys.stdin.isatty():
+        code = run_homepage_menu(args)
+    else:
+        code = run_wizard(args)
     raise SystemExit(code)
 
 

@@ -41,6 +41,7 @@ scripts/harness/check_consistency.sh
 1. `scripts/check_consistency.sh` 是稳定入口，适合直接给 Agent 调用
 2. `scripts/harness/check_consistency.sh` 负责真实逻辑，可继续扩展
 3. 入口会优先识别代码变更并执行同步，再进行 `diff-sync + audit`
+4. `audit` 默认同时输出结构一致性问题与中文文案规范建议（建议项默认不阻断）
 
 ## 主模板策略（重要）
 
@@ -150,6 +151,7 @@ install.bat
 ```
 
 安装器会自动识别当前系统（macOS / Linux / Windows），并进入一键模式：只需选择安装场景（已有代码/新项目/Axure/全局），其余参数自动完成（自动安装、自动初始化、重复安装默认重装 Skill）。
+如果双击安装时未检测到 Python，会自动进入“无 Python 安装模式”：复制 Skill 到目标项目根目录的 `.agents/skills/create-prd/`，并注入 `AGENTS.md` / `CLAUDE.md`（含 `.agents/AGENTS.md` 与 `.claude/CLAUDE.md` 兼容文件）。
 
 如需完整向导（逐项配置）：
 

@@ -75,7 +75,8 @@ bash scripts/check_consistency.sh . --mode=strict
 说明：
 - `scripts/check_consistency.sh` 是项目级统一检查入口。
 - 当前入口会转发到 `scripts/harness/check_consistency.sh`，后续扩展更多约束时仍保持该入口不变。
-- 该入口默认会按变更类型自动选择 `sync --from-code` 或 `sync --from-prd`，然后再执行一致性检查。
+- 该入口默认会按变更类型自动选择 `sync --from-code` 或 `sync --from-prd`，然后执行一致性检查。
+- 一致性检查同时覆盖：结构链路（路由/功能/变更/traceability）与中文文案规范建议项。
 
 ## 新增页面规则
 
